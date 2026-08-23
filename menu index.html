@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>菜單點單系統 / Menu Ordering System</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 20px; max-width: 420px; margin: auto; background-color: #f5f5f7; color: #1d1d1f; }
+        .card { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        .lang-switcher { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 15px; }
+        .lang-btn { background: #e5e5ea; border: none; padding: 6px 12px; border-radius: 15px; font-size: 13px; font-weight: 600; cursor: pointer; color: #555; }
+        .lang-btn.active { background: #5865F2; color: white; }
+        h2 { text-align: center; margin-top: 0; color: #5865F2; }
+        .form-group { margin-bottom: 20px; }
+        label.title { display: block; margin-bottom: 8px; font-weight: 600; font-size: 15px; }
+        input[type="text"] { width: 100%; padding: 12px; box-sizing: border-box; border: 1px solid #d2d2d7; border-radius: 10px; font-size: 15px; background-color: #fbfbfd; }
+        .item-group { display: flex; flex-direction: column; gap: 10px; background: #fbfbfd; padding: 12px; border-radius: 10px; border: 1px solid #d2d2d7; }
+        .item-option { display: flex; align-items: center; justify-content: space-between; font-size: 15px; }
+        .item-option label { cursor: pointer; flex-grow: 1; display: flex; align-items: center; gap: 6px; }
+        .qty-select { width: 75px !important; padding: 4px 6px !important; margin-left: 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; }
+        .submit-btn { width: 100%; padding: 14px; background-color: #5865F2; color: white; border: none; border-radius: 12px; font-weight: 600; font-size: 17px; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div class="lang-switcher">
+            <button class="lang-btn active" id="btn-zh" onclick="setLanguage('zh')">繁體中文</button>
+            <button class="lang-btn" id="btn-en" onclick="setLanguage('en')">English</button>
+        </div>
+
+        <h2 id="txt-title">菜單點單</h2>
+
+        <form id="orderForm">
+            <div class="form-group">
+                <label class="title" id="lbl-name" for="name">顧客稱呼</label>
+                <input type="text" id="name" required placeholder="請輸入姓名或暱稱">
+            </div>
+
+            <!-- 飲品選擇 -->
+            <div class="form-group">
+                <label class="title" id="lbl-drinks">🥤 飲品選擇</label>
+                <div class="item-group">
+                    <div class="item-option"><label><input type="checkbox" name="item" value="lemon_tea"> <span class="item-name" data-zh="維他檸檬茶" data-en="Vita Lemon Tea">維他檸檬茶</span></label><select class="qty-select" data-item="lemon_tea"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="duck_shit_lemon_tea"> <span class="item-name" data-zh="鴨屎香檸檬茶" data-en="Ya Shi Xiang Lemon Tea">鴨屎香檸檬茶</span></label><select class="qty-select" data-item="duck_shit_lemon_tea"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="blue_scream"> <span class="item-name" data-zh="藍色尖叫" data-en="Scream Sports Drink (Blue)">藍色尖叫</span></label><select class="qty-select" data-item="blue_scream"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="coke"> <span class="item-name" data-zh="可口可樂" data-en="Coca-Cola">可口可樂</span></label><select class="qty-select" data-item="coke Cola"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="sprite"> <span class="item-name" data-zh="雪碧" data-en="Sprite">雪碧</span></label><select class="qty-select" data-item="sprite"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                </div>
+            </div>
+
+            <!-- 零食選擇 -->
+            <div class="form-group">
+                <label class="title" id="lbl-snacks">🍿 零食選擇</label>
+                <div class="item-group">
+                    <div class="item-option"><label><input type="checkbox" name="item" value="lays_truffle"> <span class="item-name" data-zh="黑松露薯片（樂事）" data-en="Lay's Black Truffle Chips">黑松露薯片（樂事）</span></label><select class="qty-select" data-item="lays_truffle"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="pringles_sour_cream"> <span class="item-name" data-zh="酸忌廉洋蔥薯片（品客）" data-en="Pringles Sour Cream & Onion Chips">酸忌廉洋蔥薯片（品客）</span></label><select class="qty-select" data-item="pringles_sour_cream Chips"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="takis"> <span class="item-name" data-zh="TAKIS" data-en="Takis">TAKIS</span></label><select class="qty-select" data-item="takis"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="calbee_hot_wave"> <span class="item-name" data-zh="卡樂B熱浪薯片" data-en="Calbee Hot Wave Chips">卡樂B熱浪薯片</span></label><select class="qty-select" data-item="calbee_hot_wave"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="grill_corn_spicy"> <span class="item-name" data-zh="卡樂B粟一燒（辣味）" data-en="Calbee Grill Corn (Spicy)">卡樂B粟一燒（辣味）</span></label><select class="qty-select" data-item="grill_corn_spicy"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="btn-submit">確認送出</button>
+        </form>
+    </div>
+
+    <script>
+        // ⚠️ 請將引號內替換成你的 Discord Webhook URL
+        const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1539665609661350019/qEtOK9F35d5VxJXMK3k0paKuzwQchl8Y-YkcdO4YWj2jmzTcACoVmgZzNcTTOCACMaiR";
+
+        let currentLang = 'zh';
+
+        const translations = {
+            zh: { title: "菜單點單", lblName: "顧客稱呼", inputNamePlaceholder: "請輸入姓名或暱稱", lblDrinks: "🥤 飲品選擇", lblSnacks: "🍿 零食選擇", btnSubmit: "確認送出", alertNoSelect: "請至少選擇一項飲品或零食！", alertSuccess: "🎉 點單成功！店家已收到通知。" },
+            en: { title: "Menu Order", lblName: "Your Name", inputNamePlaceholder: "Enter your name or nickname", lblDrinks: "🥤 Drinks", lblSnacks: "🍿 Snacks", btnSubmit: "Submit Order", alertNoSelect: "Please select at least one drink or snack!", alertSuccess: "🎉 Order submitted successfully!" }
+        };
+
+        function setLanguage(lang) {
+            currentLang = lang;
+            const t = translations[lang];
+            document.getElementById('btn-zh').classList.toggle('active', lang === 'zh');
+            document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            document.getElementById('txt-title').innerText = t.title;
+            document.getElementById('lbl-name').innerText = t.lblName;
+            document.getElementById('name').placeholder = t.inputNamePlaceholder;
+            document.getElementById('lbl-drinks').innerText = t.lblDrinks;
+            document.getElementById('lbl-snacks').innerText = t.lblSnacks;
+            document.getElementById('btn-submit').innerText = t.btnSubmit;
+            document.querySelectorAll('.item-name').forEach(span => { span.innerText = span.getAttribute(`data-${lang}`); });
+        }
+
+        document.getElementById('orderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const t = translations[currentLang];
+            const name = document.getElementById('name').value;
+            let selectedItems = [];
+
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            if (checkboxes.length === 0) {
+                alert(t.alertNoSelect);
+                return;
+            }
+
+            checkboxes.forEach(cb => {
+                const itemSpan = cb.parentElement.querySelector('.item-name');
+                const itemName = itemSpan.getAttribute(`data-${currentLang}`);
+                const itemKey = cb.parentElement.parentElement.querySelector('.qty-select').getAttribute('data-item');
+                const qtySelect = document.querySelector(`.qty-select[data-item="${itemKey}"]`);
+                const qty = qtySelect ? qtySelect.value : 1;
+                selectedItems.push(`• ${itemName} x ${qty}`);
+            });
+
+            // 組合 Discord 卡片訊息
+            const payload = {
+                content: "🚨 **新點單！**",
+                embeds: [{
+                    title: "🛒 訂單明細",
+                    color: 5793266, // 綠色
+                    fields: [
+                        { name: "👤 顧客稱呼", value: name, inline: false },
+                        { name: "📋 點單內容", value: selectedItems.join("\n"), inline: false }
+                    ],
+                    timestamp: new Date().toISOString()
+                }]
+            };
+
+            // 發送至 Discord
+            fetch(DISCORD_WEBHOOK_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            }).then(response => {
+                if (response.ok) {
+                    alert(t.alertSuccess);
+                    document.getElementById('orderForm').reset();
+                } else {
+                    alert("發送失敗，請檢查 Webhook 網址是否正確。");
+                }
+            }).catch(err => alert("網路連線錯誤，請重試。"));
+        });
+    </script>
+</body>
+</html>
