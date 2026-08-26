@@ -10,6 +10,8 @@
         .lang-switcher { display: flex; justify-content: flex-end; gap: 8px; margin-bottom: 15px; }
         .lang-btn { background: #e5e5ea; border: none; padding: 6px 12px; border-radius: 15px; font-size: 13px; font-weight: 600; cursor: pointer; color: #555; }
         .lang-btn.active { background: #5865F2; color: white; }
+        .apple-logo { text-align: center; margin-bottom: 8px; }
+        .apple-logo svg { width: 36px; height: 36px; fill: #1d1d1f; }
         h2 { text-align: center; margin-top: 0; color: #5865F2; }
         .form-group { margin-bottom: 20px; }
         label.title { display: block; margin-bottom: 8px; font-weight: 600; font-size: 15px; }
@@ -29,6 +31,13 @@
         <div class="lang-switcher">
             <button class="lang-btn active" id="btn-zh" onclick="setLanguage('zh')">繁體中文</button>
             <button class="lang-btn" id="btn-en" onclick="setLanguage('en')">English</button>
+        </div>
+
+        <!-- 蘋果 Logo -->
+        <div class="apple-logo">
+            <svg viewBox="0 0 170 170" aria-label="Apple Logo">
+                <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.33.13-9.13-1.92-14.39-6.15-3.15-2.61-7.06-7.23-11.73-13.85-6.84-9.75-12.28-20.73-16.32-32.94-4.04-12.21-6.06-23.77-6.06-34.68 0-14.15 3.51-25.75 10.53-34.8 7.02-9.05 15.86-13.68 26.52-13.89 4.33 0 9.42 1.12 15.27 3.37 5.85 2.25 9.78 3.37 11.78 3.37 1.77 0 5.81-1.18 12.13-3.55 6.32-2.37 11.45-3.42 15.39-3.16 11.16.85 19.98 5.09 26.47 12.71-9.98 6.03-14.88 14.51-14.7 25.44.18 8.63 3.37 15.85 9.58 21.66 6.21 5.81 13.79 9.1 22.73 9.87-2.31 6.82-5.42 13.83-9.33 21.03zM119.22 31.81c0-6.73 2.45-13.25 7.35-19.56 4.9-6.31 11.02-10.42 18.36-12.33.68 6.94-1.52 13.56-6.61 19.86-5.09 6.3-11.3 10.46-18.63 12.48-.12-.15-.47-.23-.47-.45z"/>
+            </svg>
         </div>
 
         <h2 id="txt-title">菜單點單</h2>
@@ -51,11 +60,11 @@
                 <div class="item-group">
                     <div class="item-option"><label><input type="checkbox" name="item" value="lemon_tea"> <span class="item-name" data-zh="維他檸檬茶" data-en="Vita Lemon Tea">維他檸檬茶</span></label><select class="qty-select" data-item="lemon_tea"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
                     <div class="item-option"><label><input type="checkbox" name="item" value="duck_shit_lemon_tea"> <span class="item-name" data-zh="鴨屎香檸檬茶" data-en="Ya Shi Xiang Lemon Tea">鴨屎香檸檬茶</span></label><select class="qty-select" data-item="duck_shit_lemon_tea"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="cc_lemon"> <span class="item-name" data-zh="CC檸檬" data-en="C.C. Lemon">CC檸檬</span></label><select class="qty-select" data-item="cc_lemon"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
                     <div class="item-option"><label><input type="checkbox" name="item" value="blue_scream"> <span class="item-name" data-zh="藍色尖叫" data-en="Scream Sports Drink (Blue)">藍色尖叫</span></label><select class="qty-select" data-item="blue_scream"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
                     <div class="item-option"><label><input type="checkbox" name="item" value="coke"> <span class="item-name" data-zh="可口可樂" data-en="Coca-Cola">可口可樂</span></label><select class="qty-select" data-item="coke"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
                     <div class="item-option"><label><input type="checkbox" name="item" value="sprite"> <span class="item-name" data-zh="雪碧" data-en="Sprite">雪碧</span></label><select class="qty-select" data-item="sprite"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
                     <div class="item-option"><label><input type="checkbox" name="item" value="nestea_lemon_tea"> <span class="item-name" data-zh="雀巢檸檬茶" data-en="Nestea Lemon Tea">雀巢檸檬茶</span></label><select class="qty-select" data-item="nestea_lemon_tea"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                    <div class="item-option"><label><input type="checkbox" name="item" value="C.C_Lemon"> <span class="item-name" data-zh="C.C檸檬" data-en="C.C Lemon">C.C檸檬</span></label><select class="qty-select" data-item=""><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
                     <div class="item-option"><label><input type="checkbox" name="item" value="nestea_ice_rush"> <span class="item-name" data-zh="雀巢冰極檸檬茶" data-en="Nestea Ice Rush Lemon Tea">雀巢冰極檸檬茶</span></label><select class="qty-select" data-item="nestea_ice_rush"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
                 </div>
             </div>
@@ -89,8 +98,8 @@
     </div>
 
     <script>
-        // 下方請替換成你的 Discord Webhook URL
-        const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1539665609661350019/qEtOK9F35d5VxJXMK3k0paKuzwQchl8Y-YkcdO4YWj2jmzTcACoVmgZzNcTTOCACMaiR";
+        // 請將下方字串替換成您自己的 Discord Webhook URL
+        const DISCORD_WEBHOOK_URL = "YOUR_DISCORD_WEBHOOK_URL_HERE";
 
         let currentLang = 'zh';
 
@@ -225,3 +234,4 @@
     </script>
 </body>
 </html>
+                    
