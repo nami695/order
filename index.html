@@ -10,36 +10,36 @@
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* 柔和流動感漸變背景 */
+        /* 純白背景 */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
-            padding: 24px 15px;
+            padding: 30px 15px;
             max-width: 440px;
             margin: auto;
             min-height: 100vh;
-            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 50%, #e0c3fc 100%);
-            background-size: 200% 200%;
-            animation: gradientFlow 12s ease infinite;
+            background-color: #ffffff;
             color: #1d1d1f;
         }
 
-        @keyframes gradientFlow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* 液體玻璃主要卡片 (Glassmorphism Main Card) */
+        /* 液體玻璃主卡片 (純白基底上的磨砂玻璃) */
         .card {
-            background: rgba(255, 255, 255, 0.35);
-            backdrop-filter: blur(25px) saturate(180%);
-            -webkit-backdrop-filter: blur(25px) saturate(180%);
+            background: rgba(245, 245, 247, 0.65);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
             padding: 28px 22px;
             border-radius: 28px;
-            border: 1px solid rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(220, 220, 230, 0.8);
             box-shadow: 
-                0 20px 40px rgba(31, 38, 135, 0.12),
-                inset 0 1px 1px rgba(255, 255, 255, 0.8);
+                0 12px 32px rgba(0, 0, 0, 0.05),
+                inset 0 1px 2px rgba(255, 255, 255, 0.9);
+        }
+
+        /* 透明文字效果 (適用於標題、標籤與選項) */
+        .glass-text {
+            background: linear-gradient(135deg, rgba(30, 30, 30, 0.85) 0%, rgba(100, 100, 100, 0.5) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
         }
 
         /* 語言切換按鈕 */
@@ -47,47 +47,34 @@
             display: flex;
             justify-content: flex-end;
             gap: 8px;
-            margin-bottom: 12px;
+            margin-bottom: 20px;
         }
 
         .lang-btn {
-            background: rgba(255, 255, 255, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(200, 200, 210, 0.5);
             padding: 6px 14px;
             border-radius: 20px;
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            color: #333;
             backdrop-filter: blur(10px);
+            color: #444;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
         }
 
         .lang-btn.active {
-            background: rgba(88, 101, 242, 0.85);
-            color: white;
-            border-color: rgba(255, 255, 255, 0.6);
-            box-shadow: 0 4px 12px rgba(88, 101, 242, 0.3);
-        }
-
-        /* 官方高清標準 Apple Logo */
-        .apple-logo {
-            text-align: center;
-            margin-bottom: 8px;
-        }
-
-        .apple-logo svg {
-            width: 40px;
-            height: 40px;
-            fill: #1d1d1f;
-            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+            background: rgba(88, 101, 242, 0.15);
+            border-color: rgba(88, 101, 242, 0.4);
+            color: #5865F2;
+            box-shadow: 0 4px 12px rgba(88, 101, 242, 0.15);
         }
 
         h2 {
             text-align: center;
             margin-top: 0;
-            margin-bottom: 22px;
-            color: #1d1d1f;
-            font-weight: 700;
+            margin-bottom: 24px;
+            font-size: 26px;
             letter-spacing: -0.5px;
         }
 
@@ -98,35 +85,34 @@
         label.title {
             display: block;
             margin-bottom: 8px;
-            font-weight: 600;
             font-size: 15px;
-            color: #2c2c2e;
         }
 
-        /* 液體玻璃風格輸入框 */
+        /* 液體玻璃輸入框 */
         input[type="text"], input[type="number"] {
             width: 100%;
             padding: 12px 14px;
-            border: 1px solid rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(210, 210, 220, 0.6);
             border-radius: 14px;
             font-size: 15px;
-            background: rgba(255, 255, 255, 0.45);
+            background: rgba(255, 255, 255, 0.5);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             outline: none;
-            color: #1d1d1f;
-            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            color: #333;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04);
         }
 
         input[type="text"]:focus, input[type="number"]:focus {
-            background: rgba(255, 255, 255, 0.7);
-            border-color: rgba(88, 101, 242, 0.6);
-            box-shadow: 0 0 10px rgba(88, 101, 242, 0.25);
+            background: rgba(255, 255, 255, 0.85);
+            border-color: rgba(88, 101, 242, 0.5);
+            box-shadow: 0 0 12px rgba(88, 101, 242, 0.2);
         }
 
         input[type="number"]:disabled {
-            background: rgba(200, 200, 200, 0.25);
+            background: rgba(230, 230, 230, 0.3);
             cursor: not-allowed;
-            opacity: 0.6;
+            opacity: 0.5;
         }
 
         .tip-checkbox-label {
@@ -134,7 +120,6 @@
             align-items: center;
             gap: 8px;
             font-size: 15px;
-            font-weight: 600;
             cursor: pointer;
             margin-bottom: 8px;
             user-select: none;
@@ -145,11 +130,13 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.45);
             padding: 14px;
             border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(10px);
+            border: 1px solid rgba(220, 220, 230, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.8);
         }
 
         .item-option {
@@ -168,46 +155,59 @@
             gap: 8px;
         }
 
+        /* 液體玻璃下拉選單 */
         .qty-select {
             width: 72px !important;
             padding: 5px 8px !important;
             margin-left: 10px;
             border-radius: 10px;
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(210, 210, 220, 0.6);
+            background: rgba(255, 255, 255, 0.6);
             font-size: 14px;
             outline: none;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
             cursor: pointer;
+            color: #333;
         }
 
-        /* 液體玻璃懸浮按鈕 */
+        /* 液體玻璃提交按鈕 (帶透明文字) */
         .submit-btn {
             width: 100%;
             padding: 15px;
-            background: rgba(88, 101, 242, 0.85);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.6);
+            border: 1px solid rgba(200, 200, 220, 0.8);
             border-radius: 18px;
-            font-weight: 600;
             font-size: 17px;
             cursor: pointer;
             margin-top: 10px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 20px rgba(88, 101, 242, 0.35);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            box-shadow: 
+                0 8px 20px rgba(0, 0, 0, 0.06),
+                inset 0 1px 2px rgba(255, 255, 255, 0.9);
+        }
+
+        .submit-btn span {
+            background: linear-gradient(135deg, #2c2c2e 0%, #6e6e73 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
         }
 
         .submit-btn:hover {
-            background: rgba(88, 101, 242, 0.95);
+            background: rgba(255, 255, 255, 0.85);
             transform: translateY(-2px);
-            box-shadow: 0 12px 25px rgba(88, 101, 242, 0.45);
+            border-color: rgba(180, 180, 200, 0.9);
+            box-shadow: 
+                0 12px 25px rgba(0, 0, 0, 0.08),
+                inset 0 1px 3px rgba(255, 255, 255, 1);
         }
 
         .submit-btn:active {
             transform: translateY(0);
         }
 
-        /* 自訂勾選框視覺優化 */
         input[type="checkbox"] {
             width: 18px;
             height: 18px;
@@ -224,54 +224,47 @@
             <button class="lang-btn" id="btn-en" onclick="setLanguage('en')">English</button>
         </div>
 
-        <!-- 高清 Apple Logo -->
-        <div class="apple-logo">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 170" aria-label="Apple Logo">
-                <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.33.13-9.13-1.92-14.39-6.15-3.15-2.61-7.06-7.23-11.73-13.85-6.84-9.75-12.28-20.73-16.32-32.94-4.04-12.21-6.06-23.77-6.06-34.68 0-14.15 3.51-25.75 10.53-34.8 7.02-9.05 15.86-13.68 26.52-13.89 4.33 0 9.42 1.12 15.27 3.37 5.85 2.25 9.78 3.37 11.78 3.37 1.77 0 5.81-1.18 12.13-3.55 6.32-2.37 11.45-3.42 15.39-3.16 11.16.85 19.98 5.09 26.47 12.71-9.98 6.03-14.88 14.51-14.7 25.44.18 8.63 3.37 15.85 9.58 21.66 6.21 5.81 13.79 9.1 22.73 9.87-2.31 6.82-5.42 13.83-9.33 21.03zM119.22 31.81c0-6.73 2.45-13.25 7.35-19.56 4.9-6.31 11.02-10.42 18.36-12.33.68 6.94-1.52 13.56-6.61 19.86-5.09 6.3-11.3 10.46-18.63 12.48-.12-.15-.47-.23-.47-.45z"/>
-            </svg>
-        </div>
-
-        <h2 id="txt-title">菜單點單</h2>
+        <h2 id="txt-title" class="glass-text">菜單點單</h2>
 
         <form id="orderForm">
             <div class="form-group">
-                <label class="title" id="lbl-name" for="name">顧客稱呼</label>
+                <label class="title glass-text" id="lbl-name" for="name">顧客稱呼</label>
                 <input type="text" id="name" required placeholder="請輸入姓名或暱稱">
             </div>
 
             <!-- 預計送達時間 -->
             <div class="form-group">
-                <label class="title" id="lbl-time" for="deliveryTime">🕒 預計送達時間</label>
+                <label class="title glass-text" id="lbl-time" for="deliveryTime">🕒 預計送達時間</label>
                 <input type="text" id="deliveryTime" placeholder="例如：18:30 或 盡快送達">
             </div>
 
             <!-- 飲品選擇 -->
             <div class="form-group">
-                <label class="title" id="lbl-drinks">🥤 飲品選擇</label>
+                <label class="title glass-text" id="lbl-drinks">🥤 飲品選擇</label>
                 <div class="item-group">
-                    <div class="item-option"><label><input type="checkbox" name="item" value="lemon_tea"> <span class="item-name" data-zh="維他檸檬茶" data-en="Vita Lemon Tea">維他檸檬茶</span></label><select class="qty-select" data-item="lemon_tea"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                    <div class="item-option"><label><input type="checkbox" name="item" value="duck_shit_lemon_tea"> <span class="item-name" data-zh="鴨屎香檸檬茶" data-en="Ya Shi Xiang Lemon Tea">鴨屎香檸檬茶</span></label><select class="qty-select" data-item="duck_shit_lemon_tea"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                    <div class="item-option"><label><input type="checkbox" name="item" value="cc_lemon"> <span class="item-name" data-zh="CC檸檬" data-en="C.C. Lemon">CC檸檬</span></label><select class="qty-select" data-item="cc_lemon"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                    <div class="item-option"><label><input type="checkbox" name="item" value="blue_scream"> <span class="item-name" data-zh="藍色尖叫" data-en="Scream Sports Drink (Blue)">藍色尖叫</span></label><select class="qty-select" data-item="blue_scream"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                    <div class="item-option"><label><input type="checkbox" name="item" value="coke"> <span class="item-name" data-zh="可口可樂" data-en="Coca-Cola">可口可樂</span></label><select class="qty-select" data-item="coke"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                    <div class="item-option"><label><input type="checkbox" name="item" value="sprite"> <span class="item-name" data-zh="雪碧" data-en="Sprite">雪碧</span></label><select class="qty-select" data-item="sprite"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                    <div class="item-option"><label><input type="checkbox" name="item" value="nestea_lemon_tea"> <span class="item-name" data-zh="雀巢檸檬茶" data-en="Nestea Lemon Tea">雀巢檸檬茶</span></label><select class="qty-select" data-item="nestea_lemon_tea"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                    <div class="item-option"><label><input type="checkbox" name="item" value="nestea_ice_rush"> <span class="item-name" data-zh="雀巢冰極檸檬茶" data-en="Nestea Ice Rush Lemon Tea">雀巢冰極檸檬茶</span></label><select class="qty-select" data-item="nestea_ice_rush"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="lemon_tea"> <span class="item-name glass-text" data-zh="維他檸檬茶" data-en="Vita Lemon Tea">維他檸檬茶</span></label><select class="qty-select" data-item="lemon_tea"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="duck_shit_lemon_tea"> <span class="item-name glass-text" data-zh="鴨屎香檸檬茶" data-en="Ya Shi Xiang Lemon Tea">鴨屎香檸檬茶</span></label><select class="qty-select" data-item="duck_shit_lemon_tea"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="cc_lemon"> <span class="item-name glass-text" data-zh="CC檸檬" data-en="C.C. Lemon">CC檸檬</span></label><select class="qty-select" data-item="cc_lemon"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="blue_scream"> <span class="item-name glass-text" data-zh="藍色尖叫" data-en="Scream Sports Drink (Blue)">藍色尖叫</span></label><select class="qty-select" data-item="blue_scream"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="coke"> <span class="item-name glass-text" data-zh="可口可樂" data-en="Coca-Cola">可口可樂</span></label><select class="qty-select" data-item="coke"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="sprite"> <span class="item-name glass-text" data-zh="雪碧" data-en="Sprite">雪碧</span></label><select class="qty-select" data-item="sprite"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="nestea_lemon_tea"> <span class="item-name glass-text" data-zh="雀巢檸檬茶" data-en="Nestea Lemon Tea">雀巢檸檬茶</span></label><select class="qty-select" data-item="nestea_lemon_tea"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="nestea_ice_rush"> <span class="item-name glass-text" data-zh="雀巢冰極檸檬茶" data-en="Nestea Ice Rush Lemon Tea">雀巢冰極檸檬茶</span></label><select class="qty-select" data-item="nestea_ice_rush"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
                 </div>
             </div>
 
             <!-- 零食選擇 -->
             <div class="form-group">
-                <label class="title" id="lbl-snacks">🍿 零食選擇</label>
+                <label class="title glass-text" id="lbl-snacks">🍿 零食選擇</label>
                 <div class="item-group">
-                    <div class="item-option"><label><input type="checkbox" name="item" value="lays_truffle"> <span class="item-name" data-zh="黑松露薯片（樂事）" data-en="Lay's Black Truffle Chips">黑松露薯片（樂事）</span></label><select class="qty-select" data-item="lays_truffle"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                    <div class="item-option"><label><input type="checkbox" name="item" value="pringles_sour_cream"> <span class="item-name" data-zh="酸忌廉洋蔥薯片（品客）" data-en="Pringles Sour Cream & Onion Chips">酸忌廉洋蔥薯片（品客）</span></label><select class="qty-select" data-item="pringles_sour_cream"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                    <div class="item-option"><label><input type="checkbox" name="item" value="takis"> <span class="item-name" data-zh="TAKIS" data-en="Takis">TAKIS</span></label><select class="qty-select" data-item="takis"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                    <div class="item-option"><label><input type="checkbox" name="item" value="calbee_hot_wave"> <span class="item-name" data-zh="卡樂B熱浪薯片" data-en="Calbee Hot Wave Chips">卡樂B熱浪薯片</span></label><select class="qty-select" data-item="calbee_hot_wave"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                    <div class="item-option"><label><input type="checkbox" name="item" value="grill_corn_spicy"> <span class="item-name" data-zh="卡樂B粟一燒（辣味）" data-en="Calbee Grill Corn (Spicy)">卡樂B粟一燒（辣味）</span></label><select class="qty-select" data-item="grill_corn_spicy"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                    <div class="item-option"><label><input type="checkbox" name="item" value="konjac_spicy"> <span class="item-name" data-zh="魔芋爽（香辣味）" data-en="Konjac Snack (Spicy)">魔芋爽（香辣味）</span></label><select class="qty-select" data-item="konjac_spicy"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                    <div class="item-option"><label><input type="checkbox" name="item" value="konjac_numbing_spicy"> <span class="item-name" data-zh="魔芋爽（麻辣味）" data-en="Konjac Snack (Mala Spicy)">魔芋爽（麻辣味）</span></label><select class="qty-select" data-item="konjac_numbing_spicy"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
-                    <div class="item-option"><label><input type="checkbox" name="item" value="konjac_sour_spicy"> <span class="item-name" data-zh="魔芋爽（酸辣味）" data-en="Konjac Snack (Sour & Spicy)">魔芋爽（酸辣味）</span></label><select class="qty-select" data-item="konjac_sour_spicy"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="lays_truffle"> <span class="item-name glass-text" data-zh="黑松露薯片（樂事）" data-en="Lay's Black Truffle Chips">黑松露薯片（樂事）</span></label><select class="qty-select" data-item="lays_truffle"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="pringles_sour_cream"> <span class="item-name glass-text" data-zh="酸忌廉洋蔥薯片（品客）" data-en="Pringles Sour Cream & Onion Chips">酸忌廉洋蔥薯片（品客）</span></label><select class="qty-select" data-item="pringles_sour_cream"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="takis"> <span class="item-name glass-text" data-zh="TAKIS" data-en="Takis">TAKIS</span></label><select class="qty-select" data-item="takis"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="calbee_hot_wave"> <span class="item-name glass-text" data-zh="卡樂B熱浪薯片" data-en="Calbee Hot Wave Chips">卡樂B熱浪薯片</span></label><select class="qty-select" data-item="calbee_hot_wave"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="grill_corn_spicy"> <span class="item-name glass-text" data-zh="卡樂B粟一燒（辣味）" data-en="Calbee Grill Corn (Spicy)">卡樂B粟一燒（辣味）</span></label><select class="qty-select" data-item="grill_corn_spicy"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="konjac_spicy"> <span class="item-name glass-text" data-zh="魔芋爽（香辣味）" data-en="Konjac Snack (Spicy)">魔芋爽（香辣味）</span></label><select class="qty-select" data-item="konjac_spicy"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="konjac_numbing_spicy"> <span class="item-name glass-text" data-zh="魔芋爽（麻辣味）" data-en="Konjac Snack (Mala Spicy)">魔芋爽（麻辣味）</span></label><select class="qty-select" data-item="konjac_numbing_spicy"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+                    <div class="item-option"><label><input type="checkbox" name="item" value="konjac_sour_spicy"> <span class="item-name glass-text" data-zh="魔芋爽（酸辣味）" data-en="Konjac Snack (Sour & Spicy)">魔芋爽（酸辣味）</span></label><select class="qty-select" data-item="konjac_sour_spicy"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
                 </div>
             </div>
 
@@ -279,12 +272,14 @@
             <div class="form-group">
                 <label class="tip-checkbox-label">
                     <input type="checkbox" id="enableTip">
-                    <span id="lbl-tip-check">🪙 我要給予小費</span>
+                    <span id="lbl-tip-check" class="glass-text">🪙 我要給予小費</span>
                 </label>
                 <input type="number" id="tipAmount" min="1" step="1" disabled placeholder="請勾選後輸入小費金額">
             </div>
 
-            <button type="submit" class="submit-btn" id="btn-submit">確認送出</button>
+            <button type="submit" class="submit-btn" id="btn-submit">
+                <span id="txt-btn-submit">確認送出</span>
+            </button>
         </form>
     </div>
 
@@ -357,7 +352,7 @@
             document.getElementById('lbl-snacks').innerText = t.lblSnacks;
             document.getElementById('lbl-tip-check').innerText = t.lblTipCheck;
             document.getElementById('tipAmount').placeholder = t.inputTipPlaceholder;
-            document.getElementById('btn-submit').innerText = t.btnSubmit;
+            document.getElementById('txt-btn-submit').innerText = t.btnSubmit;
             document.querySelectorAll('.item-name').forEach(span => { span.innerText = span.getAttribute(`data-${lang}`); });
         }
 
