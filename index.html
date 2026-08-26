@@ -40,7 +40,7 @@
                 0 2px 10px rgba(0, 0, 0, 0.02),
                 inset 0 1px 2px rgba(255, 255, 255, 1);
             position: relative;
-            overflow: visible; /* 確保內容不被裁切 */
+            overflow: visible;
         }
 
         .lang-switcher {
@@ -150,9 +150,7 @@
             word-break: break-word;
         }
 
-        /* ------------------------------------------------------------- */
-        /* 🧪 橫向選取數量組件 (完全絕不遮擋) */
-        /* ------------------------------------------------------------- */
+        /* 橫向數量選取器 */
         .quantity-stepper {
             display: flex;
             flex-direction: row;
@@ -447,7 +445,8 @@
     </div>
 
     <script>
-        const DISCORD_WEBHOOK_URL = "YOUR_DISCORD_WEBHOOK_URL_HERE";
+        // 設定 Discord Webhook 網址
+        const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1340625348821033000/6vV-e4G4jW2RvhY751l6dK545wE44rX8mD4S2F0P1L_example_token";
         let currentLang = 'zh';
 
         const translations = {
@@ -573,15 +572,15 @@
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
-            }).then(response => {
+            }).then(async response => {
                 if (response.ok) {
                     alert(t.alertSuccess);
                     document.getElementById('orderForm').reset();
                     tipAmountInput.disabled = true;
-                    // 重置數量為 1
                     document.querySelectorAll('.qty-val').forEach(span => span.innerText = '1');
                 } else {
-                    alert("發送失敗，請確認 Discord Webhook 網址是否正確。");
+                    const errText = await response.text();
+                    alert(`發送失敗 (HTTP ${response.status}): ${errText}`);
                 }
             }).catch(err => alert(`連線錯誤：${err.message}`));
         });
