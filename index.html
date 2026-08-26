@@ -312,7 +312,7 @@
                 <input type="text" id="deliveryTime" placeholder="例如：18:30 或 盡快送達">
             </div>
 
-            <!-- 🥤 原樣飲品分類 -->
+            <!-- 🥤 飲品分類 -->
             <div class="form-group">
                 <label class="title" id="lbl-drinks">🥤 飲品選擇</label>
                 <div class="item-group">
@@ -343,8 +343,9 @@
                         </div>
                     </div>
 
+                    <!-- ❄️ 雀巢檸檬茶專屬欄目（原味與冰極款） -->
                     <div class="item-option">
-                        <label><input type="checkbox" name="item" value="nestea_series"> <span class="item-name" data-zh="雀巢檸檬茶系列" data-en="Nestea Lemon Tea Series">雀巢檸檬茶系列</span></label>
+                        <label><input type="checkbox" name="item" value="nestea_classic"> <span class="item-name" data-zh="雀巢檸檬茶（原味）" data-en="Nestea Lemon Tea (Classic)">雀巢檸檬茶（原味）</span></label>
                         <div class="apple-glass-dropdown">
                             <div class="select-trigger">1</div>
                             <div class="glass-popover">
@@ -356,7 +357,7 @@
                     </div>
 
                     <div class="item-option">
-                        <label><input type="checkbox" name="item" value="suntory_oolong"> <span class="item-name" data-zh="三得利烏龍茶" data-en="Suntory Oolong Tea">三得利烏龍茶</span></label>
+                        <label><input type="checkbox" name="item" value="nestea_ice"> <span class="item-name" data-zh="雀巢檸檬茶（冰極款 🧊）" data-en="Nestea Ice Lemon Tea">雀巢檸檬茶（冰極款 🧊）</span></label>
                         <div class="apple-glass-dropdown">
                             <div class="select-trigger">1</div>
                             <div class="glass-popover">
@@ -408,7 +409,7 @@
                 </div>
             </div>
 
-            <!-- 🍿 原樣零食分類 -->
+            <!-- 🍿 零食分類 -->
             <div class="form-group">
                 <label class="title" id="lbl-snacks">🍿 零食選擇</label>
                 <div class="item-group">
@@ -475,10 +476,35 @@
                         </div>
                     </div>
 
-                    <div class="category-header" id="cat-spicy">🌶️ 特色辣味零食</div>
+                    <!-- 🌶️ 魔芋爽獨立拆分列表 -->
+                    <div class="category-header" id="cat-spicy">🌶️ 特色辣味零食 (魔芋爽獨立口味)</div>
 
                     <div class="item-option">
-                        <label><input type="checkbox" name="item" value="moyu_shuang"> <span class="item-name" data-zh="魔芋爽（香辣/麻辣/酸辣）" data-en="Moyu Shuang (Konjac Snack)">魔芋爽（香辣/麻辣/酸辣）</span></label>
+                        <label><input type="checkbox" name="item" value="moyu_spicy"> <span class="item-name" data-zh="魔芋爽（香辣味）" data-en="Moyu Shuang (Spicy Flavor)">魔芋爽（香辣味）</span></label>
+                        <div class="apple-glass-dropdown">
+                            <div class="select-trigger">1</div>
+                            <div class="glass-popover">
+                                <div class="popover-opt" data-value="1">1</div>
+                                <div class="popover-opt" data-value="2">2</div>
+                                <div class="popover-opt" data-value="3">3</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="item-option">
+                        <label><input type="checkbox" name="item" value="moyu_numbing"> <span class="item-name" data-zh="魔芋爽（麻辣味）" data-en="Moyu Shuang (Numbing Spicy Flavor)">魔芋爽（麻辣味）</span></label>
+                        <div class="apple-glass-dropdown">
+                            <div class="select-trigger">1</div>
+                            <div class="glass-popover">
+                                <div class="popover-opt" data-value="1">1</div>
+                                <div class="popover-opt" data-value="2">2</div>
+                                <div class="popover-opt" data-value="3">3</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="item-option">
+                        <label><input type="checkbox" name="item" value="moyu_sour_spicy"> <span class="item-name" data-zh="魔芋爽（酸辣味）" data-en="Moyu Shuang (Sour & Spicy Flavor)">魔芋爽（酸辣味）</span></label>
                         <div class="apple-glass-dropdown">
                             <div class="select-trigger">1</div>
                             <div class="glass-popover">
@@ -520,7 +546,7 @@
                 btnSubmit: "確認送出", alertNoSelect: "請至少選擇一項飲品或零食！", 
                 alertSuccess: "🎉 點單成功！店家已收到通知。",
                 catTea: "🍋 茶飲系列", catSoda: "🥤 汽水與功能飲料",
-                catChips: "🥔 薯片與脆片", catSpicy: "🌶️ 特色辣味零食"
+                catChips: "🥔 薯片與脆片", catSpicy: "🌶️ 特色辣味零食 (魔芋爽獨立口味)"
             },
             en: { 
                 title: "Menu Order", lblName: "Your Name", inputNamePlaceholder: "Enter your name or nickname", 
@@ -530,7 +556,7 @@
                 btnSubmit: "Submit Order", alertNoSelect: "Please select at least one item!", 
                 alertSuccess: "🎉 Order submitted successfully!",
                 catTea: "🍋 Tea Series", catSoda: "🥤 Sodas & Sports Drinks",
-                catChips: "🥔 Chips & Crisps", catSpicy: "🌶️ Spicy Snacks"
+                catChips: "🥔 Chips & Crisps", catSpicy: "🌶️ Spicy Snacks (Moyu Shuang Flavors)"
             }
         };
 
