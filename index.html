@@ -40,6 +40,7 @@
                 0 2px 10px rgba(0, 0, 0, 0.02),
                 inset 0 1px 2px rgba(255, 255, 255, 1);
             position: relative;
+            overflow: visible; /* 確保內容不被裁切 */
         }
 
         .lang-switcher {
@@ -135,6 +136,7 @@
             align-items: center;
             justify-content: space-between;
             position: relative;
+            gap: 12px;
         }
 
         .item-option label {
@@ -145,95 +147,63 @@
             gap: 10px;
             font-size: 14px;
             font-weight: 500;
+            word-break: break-word;
         }
 
         /* ------------------------------------------------------------- */
-        /* 🧪 WebGL / Liquid Glass 物理折射組件 */
+        /* 🧪 橫向選取數量組件 (完全絕不遮擋) */
         /* ------------------------------------------------------------- */
-        .apple-glass-dropdown {
-            position: relative;
-            user-select: none;
-            z-index: 10;
-        }
-
-        .select-trigger {
-            width: 66px;
-            padding: 6px 10px;
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.9);
+        .quantity-stepper {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 6px;
             background: rgba(255, 255, 255, 0.5);
             backdrop-filter: blur(15px) saturate(190%);
             -webkit-backdrop-filter: blur(15px) saturate(190%);
-            font-size: 14px;
-            font-weight: 700;
-            color: #1c1c1e;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+            border-radius: 16px;
+            padding: 3px 6px;
+            border: 1px solid rgba(255, 255, 255, 0.9);
             box-shadow: 
                 0 4px 12px rgba(0, 0, 0, 0.04),
                 inset 0 1px 1px rgba(255, 255, 255, 0.9);
+            flex-shrink: 0;
+            position: relative;
+            z-index: 5;
         }
 
-        .select-trigger:after {
-            content: '▾';
-            font-size: 11px;
-            color: #8e8e93;
-        }
-
-        .select-trigger:hover {
-            background: rgba(255, 255, 255, 0.8);
-            transform: scale(1.04);
-        }
-
-        .glass-popover {
-            position: absolute;
-            top: 110%;
-            right: 0;
-            width: 78px;
-            border-radius: 18px;
-            border: 1px solid rgba(255, 255, 255, 0.95);
-            background: rgba(255, 255, 255, 0.35);
-            backdrop-filter: blur(30px) saturate(220%) brightness(1.1);
-            -webkit-backdrop-filter: blur(30px) saturate(220%) brightness(1.1);
-            
-            /* SVG 物理法線扭曲 */
-            filter: url('#apple-refraction');
-            
-            box-shadow: 
-                0 15px 35px rgba(0, 0, 0, 0.12),
-                inset 0 1px 1px rgba(255, 255, 255, 1);
-            
-            overflow: hidden;
-            display: none;
-            flex-direction: column;
-            z-index: 999;
-            animation: applePop 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .glass-popover.open {
-            display: flex;
-        }
-
-        .popover-opt {
-            padding: 9px;
-            text-align: center;
-            font-weight: 700;
-            font-size: 14px;
+        .step-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.6);
             color: #1c1c1e;
+            font-size: 15px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            transition: background 0.15s ease;
+            line-height: 1;
         }
 
-        .popover-opt:hover {
-            background: rgba(0, 122, 255, 0.18);
+        .step-btn:hover {
+            background: rgba(0, 122, 255, 0.15);
             color: #007aff;
+            transform: scale(1.08);
         }
 
-        @keyframes applePop {
-            from { opacity: 0; transform: scale(0.85) translateY(-8px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
+        .step-btn:active {
+            transform: scale(0.92);
+        }
+
+        .qty-val {
+            min-width: 20px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 700;
+            color: #1c1c1e;
         }
 
         .tip-checkbox-label {
@@ -282,16 +252,6 @@
 </head>
 <body>
 
-    <!-- 🧪 GPU 物理邊緣折射與文字扭曲濾鏡 -->
-    <svg style="display: none;">
-        <defs>
-            <filter id="apple-refraction">
-                <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="3" result="noise" />
-                <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" xChannelSelector="R" yChannelSelector="G" />
-            </filter>
-        </defs>
-    </svg>
-
     <div class="glass-card">
         <div class="lang-switcher">
             <button class="lang-btn active" id="btn-zh" onclick="setLanguage('zh')">繁體中文</button>
@@ -321,50 +281,37 @@
                     
                     <div class="item-option">
                         <label><input type="checkbox" name="item" value="vita_lemon_tea"> <span class="item-name" data-zh="維他檸檬茶" data-en="Vita Lemon Tea">維他檸檬茶</span></label>
-                        <div class="apple-glass-dropdown">
-                            <div class="select-trigger">1</div>
-                            <div class="glass-popover">
-                                <div class="popover-opt" data-value="1">1</div>
-                                <div class="popover-opt" data-value="2">2</div>
-                                <div class="popover-opt" data-value="3">3</div>
-                            </div>
+                        <div class="quantity-stepper">
+                            <button type="button" class="step-btn btn-minus">-</button>
+                            <span class="qty-val">1</span>
+                            <button type="button" class="step-btn btn-plus">+</button>
                         </div>
                     </div>
 
                     <div class="item-option">
                         <label><input type="checkbox" name="item" value="duck_shit_lemon_tea"> <span class="item-name" data-zh="鴨屎香檸檬茶" data-en="Ya Shi Xiang Lemon Tea">鴨屎香檸檬茶</span></label>
-                        <div class="apple-glass-dropdown">
-                            <div class="select-trigger">1</div>
-                            <div class="glass-popover">
-                                <div class="popover-opt" data-value="1">1</div>
-                                <div class="popover-opt" data-value="2">2</div>
-                                <div class="popover-opt" data-value="3">3</div>
-                            </div>
+                        <div class="quantity-stepper">
+                            <button type="button" class="step-btn btn-minus">-</button>
+                            <span class="qty-val">1</span>
+                            <button type="button" class="step-btn btn-plus">+</button>
                         </div>
                     </div>
 
-                    <!-- ❄️ 雀巢檸檬茶專屬欄目（原味與冰極款） -->
                     <div class="item-option">
                         <label><input type="checkbox" name="item" value="nestea_classic"> <span class="item-name" data-zh="雀巢檸檬茶（原味）" data-en="Nestea Lemon Tea (Classic)">雀巢檸檬茶（原味）</span></label>
-                        <div class="apple-glass-dropdown">
-                            <div class="select-trigger">1</div>
-                            <div class="glass-popover">
-                                <div class="popover-opt" data-value="1">1</div>
-                                <div class="popover-opt" data-value="2">2</div>
-                                <div class="popover-opt" data-value="3">3</div>
-                            </div>
+                        <div class="quantity-stepper">
+                            <button type="button" class="step-btn btn-minus">-</button>
+                            <span class="qty-val">1</span>
+                            <button type="button" class="step-btn btn-plus">+</button>
                         </div>
                     </div>
 
                     <div class="item-option">
                         <label><input type="checkbox" name="item" value="nestea_ice"> <span class="item-name" data-zh="雀巢檸檬茶（冰極款 🧊）" data-en="Nestea Ice Lemon Tea">雀巢檸檬茶（冰極款 🧊）</span></label>
-                        <div class="apple-glass-dropdown">
-                            <div class="select-trigger">1</div>
-                            <div class="glass-popover">
-                                <div class="popover-opt" data-value="1">1</div>
-                                <div class="popover-opt" data-value="2">2</div>
-                                <div class="popover-opt" data-value="3">3</div>
-                            </div>
+                        <div class="quantity-stepper">
+                            <button type="button" class="step-btn btn-minus">-</button>
+                            <span class="qty-val">1</span>
+                            <button type="button" class="step-btn btn-plus">+</button>
                         </div>
                     </div>
 
@@ -372,37 +319,28 @@
 
                     <div class="item-option">
                         <label><input type="checkbox" name="item" value="blue_scream"> <span class="item-name" data-zh="藍色尖叫" data-en="Scream Sports Drink (Blue)">藍色尖叫</span></label>
-                        <div class="apple-glass-dropdown">
-                            <div class="select-trigger">1</div>
-                            <div class="glass-popover">
-                                <div class="popover-opt" data-value="1">1</div>
-                                <div class="popover-opt" data-value="2">2</div>
-                                <div class="popover-opt" data-value="3">3</div>
-                            </div>
+                        <div class="quantity-stepper">
+                            <button type="button" class="step-btn btn-minus">-</button>
+                            <span class="qty-val">1</span>
+                            <button type="button" class="step-btn btn-plus">+</button>
                         </div>
                     </div>
 
                     <div class="item-option">
                         <label><input type="checkbox" name="item" value="coca_cola"> <span class="item-name" data-zh="可樂" data-en="Coca-Cola">可樂</span></label>
-                        <div class="apple-glass-dropdown">
-                            <div class="select-trigger">1</div>
-                            <div class="glass-popover">
-                                <div class="popover-opt" data-value="1">1</div>
-                                <div class="popover-opt" data-value="2">2</div>
-                                <div class="popover-opt" data-value="3">3</div>
-                            </div>
+                        <div class="quantity-stepper">
+                            <button type="button" class="step-btn btn-minus">-</button>
+                            <span class="qty-val">1</span>
+                            <button type="button" class="step-btn btn-plus">+</button>
                         </div>
                     </div>
 
                     <div class="item-option">
                         <label><input type="checkbox" name="item" value="sprite"> <span class="item-name" data-zh="雪碧" data-en="Sprite">雪碧</span></label>
-                        <div class="apple-glass-dropdown">
-                            <div class="select-trigger">1</div>
-                            <div class="glass-popover">
-                                <div class="popover-opt" data-value="1">1</div>
-                                <div class="popover-opt" data-value="2">2</div>
-                                <div class="popover-opt" data-value="3">3</div>
-                            </div>
+                        <div class="quantity-stepper">
+                            <button type="button" class="step-btn btn-minus">-</button>
+                            <span class="qty-val">1</span>
+                            <button type="button" class="step-btn btn-plus">+</button>
                         </div>
                     </div>
 
@@ -418,100 +356,75 @@
 
                     <div class="item-option">
                         <label><input type="checkbox" name="item" value="lays_truffle"> <span class="item-name" data-zh="黑松露味薯片（樂事）" data-en="Lay's Black Truffle Chips">黑松露味薯片（樂事）</span></label>
-                        <div class="apple-glass-dropdown">
-                            <div class="select-trigger">1</div>
-                            <div class="glass-popover">
-                                <div class="popover-opt" data-value="1">1</div>
-                                <div class="popover-opt" data-value="2">2</div>
-                                <div class="popover-opt" data-value="3">3</div>
-                            </div>
+                        <div class="quantity-stepper">
+                            <button type="button" class="step-btn btn-minus">-</button>
+                            <span class="qty-val">1</span>
+                            <button type="button" class="step-btn btn-plus">+</button>
                         </div>
                     </div>
 
                     <div class="item-option">
                         <label><input type="checkbox" name="item" value="pringles_sour_cream"> <span class="item-name" data-zh="酸忌廉洋蔥味薯片（品客）" data-en="Pringles Sour Cream & Onion">酸忌廉洋蔥味薯片（品客）</span></label>
-                        <div class="apple-glass-dropdown">
-                            <div class="select-trigger">1</div>
-                            <div class="glass-popover">
-                                <div class="popover-opt" data-value="1">1</div>
-                                <div class="popover-opt" data-value="2">2</div>
-                                <div class="popover-opt" data-value="3">3</div>
-                            </div>
+                        <div class="quantity-stepper">
+                            <button type="button" class="step-btn btn-minus">-</button>
+                            <span class="qty-val">1</span>
+                            <button type="button" class="step-btn btn-plus">+</button>
                         </div>
                     </div>
 
                     <div class="item-option">
                         <label><input type="checkbox" name="item" value="calbee_hot_wave"> <span class="item-name" data-zh="卡樂B 熱浪薯片" data-en="Calbee Hot Wave Chips">卡樂B 熱浪薯片</span></label>
-                        <div class="apple-glass-dropdown">
-                            <div class="select-trigger">1</div>
-                            <div class="glass-popover">
-                                <div class="popover-opt" data-value="1">1</div>
-                                <div class="popover-opt" data-value="2">2</div>
-                                <div class="popover-opt" data-value="3">3</div>
-                            </div>
+                        <div class="quantity-stepper">
+                            <button type="button" class="step-btn btn-minus">-</button>
+                            <span class="qty-val">1</span>
+                            <button type="button" class="step-btn btn-plus">+</button>
                         </div>
                     </div>
 
                     <div class="item-option">
                         <label><input type="checkbox" name="item" value="takis"> <span class="item-name" data-zh="TAKIS 辣玉米卷" data-en="Takis Rolled Tortilla Chips">TAKIS 辣玉米卷</span></label>
-                        <div class="apple-glass-dropdown">
-                            <div class="select-trigger">1</div>
-                            <div class="glass-popover">
-                                <div class="popover-opt" data-value="1">1</div>
-                                <div class="popover-opt" data-value="2">2</div>
-                                <div class="popover-opt" data-value="3">3</div>
-                            </div>
+                        <div class="quantity-stepper">
+                            <button type="button" class="step-btn btn-minus">-</button>
+                            <span class="qty-val">1</span>
+                            <button type="button" class="step-btn btn-plus">+</button>
                         </div>
                     </div>
 
                     <div class="item-option">
                         <label><input type="checkbox" name="item" value="grill_corn"> <span class="item-name" data-zh="粟一燒" data-en="Grill Corn Chips">粟一燒</span></label>
-                        <div class="apple-glass-dropdown">
-                            <div class="select-trigger">1</div>
-                            <div class="glass-popover">
-                                <div class="popover-opt" data-value="1">1</div>
-                                <div class="popover-opt" data-value="2">2</div>
-                                <div class="popover-opt" data-value="3">3</div>
-                            </div>
+                        <div class="quantity-stepper">
+                            <button type="button" class="step-btn btn-minus">-</button>
+                            <span class="qty-val">1</span>
+                            <button type="button" class="step-btn btn-plus">+</button>
                         </div>
                     </div>
 
-                    <!-- 🌶️ 魔芋爽獨立拆分列表 -->
                     <div class="category-header" id="cat-spicy">🌶️ 特色辣味零食 (魔芋爽獨立口味)</div>
 
                     <div class="item-option">
                         <label><input type="checkbox" name="item" value="moyu_spicy"> <span class="item-name" data-zh="魔芋爽（香辣味）" data-en="Moyu Shuang (Spicy Flavor)">魔芋爽（香辣味）</span></label>
-                        <div class="apple-glass-dropdown">
-                            <div class="select-trigger">1</div>
-                            <div class="glass-popover">
-                                <div class="popover-opt" data-value="1">1</div>
-                                <div class="popover-opt" data-value="2">2</div>
-                                <div class="popover-opt" data-value="3">3</div>
-                            </div>
+                        <div class="quantity-stepper">
+                            <button type="button" class="step-btn btn-minus">-</button>
+                            <span class="qty-val">1</span>
+                            <button type="button" class="step-btn btn-plus">+</button>
                         </div>
                     </div>
 
                     <div class="item-option">
                         <label><input type="checkbox" name="item" value="moyu_numbing"> <span class="item-name" data-zh="魔芋爽（麻辣味）" data-en="Moyu Shuang (Numbing Spicy Flavor)">魔芋爽（麻辣味）</span></label>
-                        <div class="apple-glass-dropdown">
-                            <div class="select-trigger">1</div>
-                            <div class="glass-popover">
-                                <div class="popover-opt" data-value="1">1</div>
-                                <div class="popover-opt" data-value="2">2</div>
-                                <div class="popover-opt" data-value="3">3</div>
-                            </div>
+                        <div class="quantity-stepper">
+                            <button type="button" class="step-btn btn-minus">-</button>
+                            <span class="qty-val">1</span>
+                            <button type="button" class="step-btn btn-plus">+</button>
                         </div>
                     </div>
 
                     <div class="item-option">
                         <label><input type="checkbox" name="item" value="moyu_sour_spicy"> <span class="item-name" data-zh="魔芋爽（酸辣味）" data-en="Moyu Shuang (Sour & Spicy Flavor)">魔芋爽（酸辣味）</span></label>
-                        <div class="apple-glass-dropdown">
-                            <div class="select-trigger">1</div>
-                            <div class="glass-popover">
-                                <div class="popover-opt" data-value="1">1</div>
-                                <div class="popover-opt" data-value="2">2</div>
-                                <div class="popover-opt" data-value="3">3</div>
-                            </div>
+                        <div class="quantity-stepper">
+                            <button type="button" class="step-btn btn-minus">-</button>
+                            <span class="qty-val">1</span>
+                            <button type="button" class="step-btn btn-plus">+</button>
                         </div>
                     </div>
 
@@ -560,30 +473,23 @@
             }
         };
 
-        // 綁定自訂 Apple 水晶數量選擇器
-        document.querySelectorAll('.apple-glass-dropdown').forEach(dropdown => {
-            const trigger = dropdown.querySelector('.select-trigger');
-            const popover = dropdown.querySelector('.glass-popover');
+        // 綁定橫向數量加減按鈕事件
+        document.querySelectorAll('.quantity-stepper').forEach(stepper => {
+            const minusBtn = stepper.querySelector('.btn-minus');
+            const plusBtn = stepper.querySelector('.btn-plus');
+            const valSpan = stepper.querySelector('.qty-val');
 
-            trigger.addEventListener('click', (e) => {
-                e.stopPropagation();
-                document.querySelectorAll('.glass-popover').forEach(pop => {
-                    if (pop !== popover) pop.classList.remove('open');
-                });
-                popover.classList.toggle('open');
+            minusBtn.addEventListener('click', () => {
+                let currentVal = parseInt(valSpan.innerText);
+                if (currentVal > 1) {
+                    valSpan.innerText = currentVal - 1;
+                }
             });
 
-            popover.querySelectorAll('.popover-opt').forEach(opt => {
-                opt.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    trigger.innerText = opt.getAttribute('data-value');
-                    popover.classList.remove('open');
-                });
+            plusBtn.addEventListener('click', () => {
+                let currentVal = parseInt(valSpan.innerText);
+                valSpan.innerText = currentVal + 1;
             });
-        });
-
-        document.addEventListener('click', () => {
-            document.querySelectorAll('.glass-popover').forEach(pop => pop.classList.remove('open'));
         });
 
         // 小費開關
@@ -644,9 +550,8 @@
                 const itemSpan = cb.parentElement.querySelector('.item-name');
                 const itemName = itemSpan.getAttribute(`data-${currentLang}`);
                 const optionDiv = cb.closest('.item-option');
-                const qtySelect = optionDiv ? optionDiv.querySelector('.select-trigger') : null;
-                const qty = qtySelect ? qtySelect.innerText : 1;
-                selectedItems.push(`• ${itemName} x ${qty}`);
+                const qtyVal = optionDiv ? optionDiv.querySelector('.qty-val').innerText : 1;
+                selectedItems.push(`• ${itemName} x ${qtyVal}`);
             });
 
             const payload = {
@@ -673,6 +578,8 @@
                     alert(t.alertSuccess);
                     document.getElementById('orderForm').reset();
                     tipAmountInput.disabled = true;
+                    // 重置數量為 1
+                    document.querySelectorAll('.qty-val').forEach(span => span.innerText = '1');
                 } else {
                     alert("發送失敗，請確認 Discord Webhook 網址是否正確。");
                 }
