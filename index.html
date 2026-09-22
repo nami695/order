@@ -25,7 +25,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /*  VisionOS 水晶主容器 */
+        /* VisionOS 水晶主容器 */
         .glass-card {
             width: 100%;
             max-width: 480px;
@@ -108,6 +108,7 @@
             outline: none;
             color: #1c1c1e;
             box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.03);
+            user-select: text;
         }
 
         input[type="text"]:focus, input[type="number"]:focus {
@@ -274,11 +275,29 @@
             <div class="form-group">
                 <label class="title" id="lbl-drinks">🥤 飲品選擇</label>
                 <div class="item-group">
-                    
                     <div class="category-header" id="cat-tea">🍋 茶飲系列</div>
                     
                     <div class="item-option">
                         <label><input type="checkbox" name="item" value="vita_lemon_tea"> <span class="item-name" data-zh="維他檸檬茶" data-en="Vita Lemon Tea">維他檸檬茶</span></label>
+                        <div class="quantity-stepper">
+                            <button type="button" class="step-btn btn-minus">-</button>
+                            <span class="qty-val">1</span>
+                            <button type="button" class="step-btn btn-plus">+</button>
+                        </div>
+                    </div>
+
+                    <!-- 🆕 新增：維他蜜桃紅茶 -->
+                    <div class="item-option">
+                        <label><input type="checkbox" name="item" value="vita_peach_tea"> <span class="item-name" data-zh="維他蜜桃紅茶" data-en="Vita Peach Tea">維他蜜桃紅茶</span></label>
+                        <div class="quantity-stepper">
+                            <button type="button" class="step-btn btn-minus">-</button>
+                            <span class="qty-val">1</span>
+                            <button type="button" class="step-btn btn-plus">+</button>
+                        </div>
+                    </div>
+
+                    <div class="item-option">
+                        <label><input type="checkbox" name="item" value="vitasoy_classic"> <span class="item-name" data-zh="維他奶（原味）" data-en="Vitasoy Soymilk (Classic)">維他奶（原味）</span></label>
                         <div class="quantity-stepper">
                             <button type="button" class="step-btn btn-minus">-</button>
                             <span class="qty-val">1</span>
@@ -341,10 +360,6 @@
                             <button type="button" class="step-btn btn-plus">+</button>
                         </div>
                     </div>
-
-                    div class="item-option">
-                      
-
                 </div>
             </div>
 
@@ -352,8 +367,16 @@
             <div class="form-group">
                 <label class="title" id="lbl-snacks">🍿 零食選擇</label>
                 <div class="item-group">
-                    
                     <div class="category-header" id="cat-chips">🥔 薯片與脆片</div>
+
+                    <div class="item-option">
+                        <label><input type="checkbox" name="item" value="lays_classic"> <span class="item-name" data-zh="原味薯片（樂事）" data-en="Lay's Classic Chips">原味薯片（樂事）</span></label>
+                        <div class="quantity-stepper">
+                            <button type="button" class="step-btn btn-minus">-</button>
+                            <span class="qty-val">1</span>
+                            <button type="button" class="step-btn btn-plus">+</button>
+                        </div>
+                    </div>
 
                     <div class="item-option">
                         <label><input type="checkbox" name="item" value="lays_truffle"> <span class="item-name" data-zh="黑松露味薯片（樂事）" data-en="Lay's Black Truffle Chips">黑松露味薯片（樂事）</span></label>
@@ -384,6 +407,16 @@
 
                     <div class="item-option">
                         <label><input type="checkbox" name="item" value="takis"> <span class="item-name" data-zh="TAKIS 辣玉米卷" data-en="Takis Rolled Tortilla Chips">TAKIS 辣玉米卷</span></label>
+                        <div class="quantity-stepper">
+                            <button type="button" class="step-btn btn-minus">-</button>
+                            <span class="qty-val">1</span>
+                            <button type="button" class="step-btn btn-plus">+</button>
+                        </div>
+                    </div>
+
+                    <!-- 🆕 新增：TAKIS 藍色火焰辣玉米卷 -->
+                    <div class="item-option">
+                        <label><input type="checkbox" name="item" value="takis_blue_heat"> <span class="item-name" data-zh="TAKIS 藍色火焰辣玉米卷 (Blue Heat)" data-en="Takis Blue Heat Tortilla Chips">TAKIS 藍色火焰辣玉米卷 (Blue Heat)</span></label>
                         <div class="quantity-stepper">
                             <button type="button" class="step-btn btn-minus">-</button>
                             <span class="qty-val">1</span>
@@ -428,7 +461,6 @@
                             <button type="button" class="step-btn btn-plus">+</button>
                         </div>
                     </div>
-
                 </div>
             </div>
 
@@ -448,7 +480,6 @@
     </div>
 
     <script>
-        // 設定 Discord Webhook 網址
         const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1539665609661350019/qEtOK9F35d5VxJXMK3k0paKuzwQchl8Y-YkcdO4YWj2jmzTcACoVmgZzNcTTOCACMaiR";
         let currentLang = 'zh';
 
@@ -475,11 +506,12 @@
             }
         };
 
-        // 綁定橫向數量加減按鈕事件
-        document.querySelectorAll('.quantity-stepper').forEach(stepper => {
-            const minusBtn = stepper.querySelector('.btn-minus');
-            const plusBtn = stepper.querySelector('.btn-plus');
-            const valSpan = stepper.querySelector('.qty-val');
+        // 綁定橫向數量加減與自動勾選邏輯
+        document.querySelectorAll('.item-option').forEach(option => {
+            const checkbox = option.querySelector('input[type="checkbox"]');
+            const minusBtn = option.querySelector('.btn-minus');
+            const plusBtn = option.querySelector('.btn-plus');
+            const valSpan = option.querySelector('.qty-val');
 
             minusBtn.addEventListener('click', () => {
                 let currentVal = parseInt(valSpan.innerText);
@@ -491,6 +523,13 @@
             plusBtn.addEventListener('click', () => {
                 let currentVal = parseInt(valSpan.innerText);
                 valSpan.innerText = currentVal + 1;
+                checkbox.checked = true;
+            });
+
+            checkbox.addEventListener('change', () => {
+                if (!checkbox.checked) {
+                    valSpan.innerText = '1';
+                }
             });
         });
 
@@ -526,7 +565,9 @@
             document.getElementById('cat-chips').innerText = t.catChips;
             document.getElementById('cat-spicy').innerText = t.catSpicy;
 
-            document.querySelectorAll('.item-name').forEach(span => { span.innerText = span.getAttribute(`data-${lang}`); });
+            document.querySelectorAll('.item-name').forEach(span => { 
+                span.innerText = span.getAttribute(`data-${lang}`); 
+            });
         }
 
         // 送出點單至 Discord Webhook
