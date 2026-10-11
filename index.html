@@ -247,6 +247,95 @@
             accent-color: #007aff;
             cursor: pointer;
         }
+
+        /* 自定義彈窗 Modal 樣式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            width: 90%;
+            max-width: 380px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(30px) saturate(200%);
+            -webkit-backdrop-filter: blur(30px) saturate(200%);
+            border-radius: 28px;
+            padding: 24px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .modal-overlay.show .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #1c1c1e;
+        }
+
+        .modal-text {
+            font-size: 14px;
+            color: #6e6e73;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .modal-btn-dc {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background: #5865F2;
+            color: white;
+            text-decoration: none;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            box-shadow: 0 4px 12px rgba(88, 101, 242, 0.3);
+        }
+
+        .modal-btn-dc:hover {
+            background: #4752c4;
+        }
+
+        .modal-btn-close {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.05);
+            color: #1c1c1e;
+            border: none;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .modal-btn-close:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
     </style>
 </head>
 <body>
@@ -444,6 +533,16 @@
         </form>
     </div>
 
+    <!-- 自定義成功彈窗 (含 DC 連結) -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-card">
+            <div class="modal-title" id="modalTitle">🎉 點單成功！</div>
+            <div class="modal-text" id="modalText">店家已收到您的訂單通知。歡迎加入我們的 Discord 群組掌握最新動態！</div>
+            <a href="https://discord.gg/你的邀請碼" target="_blank" class="modal-btn-dc" id="modalDcBtn">🔗 加入我們的 Discord 群組</a>
+            <button class="modal-btn-close" onclick="closeModal()" id="modalCloseBtn">確定</button>
+        </div>
+    </div>
+
     <script>
         const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1539665609661350019/qEtOK9F35d5VxJXMK3k0paKuzwQchl8Y-YkcdO4YWj2jmzTcACoVmgZzNcTTOCACMaiR";
         let currentLang = 'zh';
@@ -455,9 +554,12 @@
                 lblDrinks: "🥤 飲品選擇", lblSnacks: "🍿 零食選擇", 
                 lblTipCheck: "🪙 我要給予小費", inputTipPlaceholder: "請勾選後輸入小費金額",
                 btnSubmit: "確認送出", alertNoSelect: "請至少選擇一項飲品或零食！", 
-                alertSuccess: "🎉 點單成功！店家已收到通知。",
                 catTea: "🍋 茶飲系列", catSoda: "🥤 汽水與功能飲料",
-                catChips: "🥔 薯片與脆片", catNoodle: "🍜 脆麵類", catSpicy: "🌶️ 特色辣味零食 (魔芋爽獨立口味)"
+                catChips: "🥔 薯片與脆片", catNoodle: "🍜 脆麵類", catSpicy: "🌶️ 特色辣味零食 (魔芋爽獨立口味)",
+                modalTitle: "🎉 點單成功！",
+                modalText: "店家已收到您的訂單通知。歡迎加入我們的 Discord 群組掌握最新動態！",
+                modalDcBtn: "🔗 加入我們的 Discord 群組",
+                modalCloseBtn: "確定"
             },
             en: { 
                 title: "Menu Order", lblName: "Your Name", inputNamePlaceholder: "Enter your name or nickname", 
@@ -465,11 +567,23 @@
                 lblDrinks: "🥤 Drinks Selection", lblSnacks: "🍿 Snacks Selection", 
                 lblTipCheck: "🪙 I'd like to leave a tip", inputTipPlaceholder: "Check the box to enter tip amount",
                 btnSubmit: "Submit Order", alertNoSelect: "Please select at least one item!", 
-                alertSuccess: "🎉 Order submitted successfully!",
                 catTea: "🍋 Tea Series", catSoda: "🥤 Sodas & Sports Drinks",
-                catChips: "🥔 Chips & Crisps", catNoodle: "🍜 Noodle Snacks", catSpicy: "🌶️ Spicy Snacks (Moyu Shuang Flavors)"
+                catChips: "🥔 Chips & Crisps", catNoodle: "🍜 Noodle Snacks", catSpicy: "🌶️ Spicy Snacks (Moyu Shuang Flavors)",
+                modalTitle: "🎉 Order Successful!",
+                modalText: "The store has received your order. Welcome to join our Discord community!",
+                modalDcBtn: "🔗 Join our Discord Server",
+                modalCloseBtn: "OK"
             }
         };
+
+        // 彈窗控制函式
+        function showModal() {
+            document.getElementById('successModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('successModal').classList.remove('show');
+        }
 
         // 綁定橫向數量加減與自動勾選邏輯
         document.querySelectorAll('.item-option').forEach(option => {
@@ -533,6 +647,12 @@
             }
             document.getElementById('cat-spicy').innerText = t.catSpicy;
 
+            // 彈窗文字多國語言更新
+            document.getElementById('modalTitle').innerText = t.modalTitle;
+            document.getElementById('modalText').innerText = t.modalText;
+            document.getElementById('modalDcBtn').innerText = t.modalDcBtn;
+            document.getElementById('modalCloseBtn').innerText = t.modalCloseBtn;
+
             document.querySelectorAll('.item-name').forEach(span => { 
                 span.innerText = span.getAttribute(`data-${lang}`); 
             });
@@ -586,7 +706,7 @@
                 body: JSON.stringify(payload)
             }).then(async response => {
                 if (response.ok) {
-                    alert(t.alertSuccess);
+                    showModal(); // 顯示精美彈窗取代 alert
                     document.getElementById('orderForm').reset();
                     tipAmountInput.disabled = true;
                     document.querySelectorAll('.qty-val').forEach(span => span.innerText = '1');
