@@ -1,0 +1,1636 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>學校平板電腦 (iPad) 預約系統</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Google Fonts: Noto Sans TC 與 Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- 引入 Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans TC', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+                    },
+                    colors: {
+                        apple: {
+                            blue: '#0071e3',
+                            blueHover: '#0077ed',
+                            bg: '#f5f5f7',
+                            card: 'rgba(255, 255, 255, 0.78)',
+                            border: 'rgba(255, 255, 255, 0.6)',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f5f5f7;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(0, 113, 227, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(52, 199, 89, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(88, 86, 214, 0.08) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: #1d1d1f;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 玻璃擬態卡片樣式 */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.78);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+        }
+
+        .glass-header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        /* 自訂滑桿樣式 */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #0071e3;
+            cursor: pointer;
+            margin-top: -7px;
+            box-shadow: 0 2px 6px rgba(0, 113, 227, 0.4);
+            transition: transform 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: #e5e5ea;
+            border-radius: 999px;
+        }
+
+        /* 隱藏捲軸但保留功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- 頂部導覽列 -->
+    <header class="glass-header sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md">
+                    <i data-lucide="tablet" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold tracking-tight text-gray-900">智慧校園 iPad 預約系統</h1>
+                    <p class="text-xs text-gray-500 hidden sm:block">資訊科技組 · 教學資源調度平台</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-3">
+                <span id="header-today-badge" class="hidden md:inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 border border-gray-200/60">
+                    <i data-lucide="calendar" class="w-3.5 h-3.5 mr-1.5 text-blue-600"></i>
+                    <span id="header-date-text">載入中...</span>
+                </span>
+                <button onclick="openResetModal()" class="inline-flex items-center px-3 py-1.5 rounded-xl text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-200/60 transition-colors" title="恢復預設的範例資料">
+                    <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 mr-1"></i>
+                    重置範例資料
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主內容區 -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
+        
+        <!-- 1. 頂部狀態看板 -->
+        <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- 總推車數 -->
+            <div class="glass-card rounded-3xl p-5 flex flex-col justify-between transition-transform hover:-translate-y-0.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-500">校內充電推車總數</span>
+                    <div class="w-9 h-9 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                        <i data-lucide="layers" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-baseline space-x-1.5">
+                        <span class="text-2xl sm:text-3xl font-bold text-gray-900" id="stat-total-devices">30</span>
+                        <span class="text-sm font-medium text-gray-500">輛推車</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1">編號：01號車 ~ 30號車 (每輛 30 台，共 900 台)</p>
+                </div>
+            </div>
+
+            <!-- 選定日期可借用上限 -->
+            <div class="glass-card rounded-3xl p-5 flex flex-col justify-between transition-transform hover:-translate-y-0.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-500">單節最少空餘推車</span>
+                    <div class="w-9 h-9 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                        <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-baseline space-x-1.5">
+                        <span class="text-2xl sm:text-3xl font-bold text-emerald-600" id="stat-min-available">30</span>
+                        <span class="text-sm font-medium text-gray-500">輛 (全天最低餘額)</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1" id="stat-selected-date-label">檢視日期：今日</p>
+                </div>
+            </div>
+
+            <!-- 選定日期已預約堂數 -->
+            <div class="glass-card rounded-3xl p-5 flex flex-col justify-between transition-transform hover:-translate-y-0.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-500">當日已預約堂次</span>
+                    <div class="w-9 h-9 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center">
+                        <i data-lucide="clock" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-baseline space-x-1.5">
+                        <span class="text-2xl sm:text-3xl font-bold text-gray-900" id="stat-booked-sessions">0</span>
+                        <span class="text-sm font-medium text-gray-500">節課</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1" id="stat-total-booked-units">共借出 0 架次推車</p>
+                </div>
+            </div>
+
+            <!-- 系統防衝突狀態 -->
+            <div class="glass-card rounded-3xl p-5 flex flex-col justify-between transition-transform hover:-translate-y-0.5">
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-medium text-gray-500">推車編號鎖定保護</span>
+                    <div class="w-9 h-9 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center">
+                        <i data-lucide="shield-check" class="w-4 h-4"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="flex items-center space-x-2">
+                        <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="text-lg sm:text-xl font-bold text-gray-900">一車一編號監控</span>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1.5">自動鎖定已借出推車，避免撞車</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. 主操作區：左側課節時間表 + 右側即時預約表單 -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+            
+            <!-- 左側：日期與課節時間表 (佔 7 欄) -->
+            <div class="lg:col-span-7 space-y-4">
+                <div class="glass-card rounded-3xl p-5 sm:p-6">
+                    <!-- 日期選擇器工具列 -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-200/70">
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-900 flex items-center">
+                                <i data-lucide="calendar-days" class="w-5 h-5 mr-2 text-blue-600"></i>
+                                課節借用狀況總覽
+                            </h2>
+                            <p class="text-xs text-gray-500 mt-0.5">點擊下方任意「可預約」時段，即可快速帶入右側預約表單</p>
+                        </div>
+
+                        <!-- 日期切換控制 -->
+                        <div class="flex items-center space-x-1.5 bg-gray-100/90 p-1 rounded-2xl border border-gray-200/60 self-start sm:self-auto">
+                            <button onclick="changeDate(-1)" class="p-2 rounded-xl hover:bg-white hover:shadow-sm text-gray-600 transition-all" title="前一天">
+                                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                            </button>
+                            <input type="date" id="view-date-picker" onchange="handleViewDateChange(this.value)" class="bg-transparent text-sm font-semibold text-gray-800 px-2 py-1 focus:outline-none cursor-pointer">
+                            <button onclick="changeDate(1)" class="p-2 rounded-xl hover:bg-white hover:shadow-sm text-gray-600 transition-all" title="後一天">
+                                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="goToToday()" class="px-2.5 py-1.5 text-xs font-medium bg-white text-blue-600 rounded-xl shadow-sm hover:bg-blue-50 transition-colors">
+                                今天
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 快速一週日期條 -->
+                    <div id="week-strip" class="grid grid-cols-7 gap-1.5 py-4 border-b border-gray-200/70">
+                        <!-- 由 JS 動態生成一週日期按鈕 -->
+                    </div>
+
+                    <!-- 課節列表 -->
+                    <div id="periods-list" class="mt-4 space-y-2.5">
+                        <!-- 由 JS 動態生成課節卡片 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右側：即時預約表單 (佔 5 欄) -->
+            <div class="lg:col-span-5 lg:sticky lg:top-24">
+                <div class="glass-card rounded-3xl p-5 sm:p-6 border-t-4 border-t-blue-600">
+                    <div class="flex items-center justify-between mb-5">
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-900 flex items-center">
+                                <i data-lucide="plus-circle" class="w-5 h-5 mr-2 text-blue-600"></i>
+                                登記預約平板
+                            </h2>
+                            <p class="text-xs text-gray-500 mt-0.5">支援單節或多節連堂預約，即時檢查餘額</p>
+                        </div>
+                        <button type="button" onclick="resetForm()" class="text-xs text-gray-400 hover:text-gray-600 underline">
+                            清空重填
+                        </button>
+                    </div>
+
+                    <!-- 防衝突警告提示框 (預設隱藏) -->
+                    <div id="conflict-alert" class="hidden mb-4 p-3.5 rounded-2xl bg-red-50/90 border border-red-200 text-red-700 text-xs flex items-start space-x-2.5">
+                        <i data-lucide="alert-triangle" class="w-4 h-4 text-red-600 shrink-0 mt-0.5"></i>
+                        <div id="conflict-alert-text" class="leading-relaxed font-medium"></div>
+                    </div>
+
+                    <form id="booking-form" onsubmit="handleBookingSubmit(event)" class="space-y-4">
+                        <!-- 教師姓名 & 任教科目 -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1.5">教師姓名 <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <input type="text" id="teacher-name" required placeholder="例：陳老師" 
+                                        class="w-full px-3.5 py-2.5 rounded-2xl bg-white/90 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1.5">任教科目 <span class="text-red-500">*</span></label>
+                                <select id="subject" required 
+                                    class="w-full px-3.5 py-2.5 rounded-2xl bg-white/90 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all">
+                                    <option value="中文">中文</option>
+                                    <option value="英文">英文</option>
+                                    <option value="數學">數學</option>
+                                    <option value="常識/科學">常識 / 科學</option>
+                                    <option value="資訊科技" selected>資訊科技</option>
+                                    <option value="視藝">視藝</option>
+                                    <option value="音樂">音樂</option>
+                                    <option value="其他">其他</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- 借用班級 & 預約日期 -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1.5">借用班級 <span class="text-red-500">*</span></label>
+                                <select id="class-name" required 
+                                    class="w-full px-3.5 py-2.5 rounded-2xl bg-white/90 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all">
+                                    <option value="" disabled selected>請選擇班別...</option>
+                                    <optgroup label="一年級 (P1)">
+                                        <option value="1D">1D</option>
+                                        <option value="1W">1W</option>
+                                        <option value="1L">1L</option>
+                                        <option value="1H">1H</option>
+                                        <option value="1F">1F</option>
+                                    </optgroup>
+                                    <optgroup label="二年級 (P2)">
+                                        <option value="2D">2D</option>
+                                        <option value="2W">2W</option>
+                                        <option value="2L">2L</option>
+                                        <option value="2H">2H</option>
+                                        <option value="2F">2F</option>
+                                    </optgroup>
+                                    <optgroup label="三年級 (P3)">
+                                        <option value="3D">3D</option>
+                                        <option value="3W">3W</option>
+                                        <option value="3L">3L</option>
+                                        <option value="3H">3H</option>
+                                        <option value="3F">3F</option>
+                                    </optgroup>
+                                    <optgroup label="四年級 (P4)">
+                                        <option value="4D">4D</option>
+                                        <option value="4W">4W</option>
+                                        <option value="4L">4L</option>
+                                        <option value="4H">4H</option>
+                                        <option value="4F">4F</option>
+                                    </optgroup>
+                                    <optgroup label="五年級 (P5)">
+                                        <option value="5D">5D</option>
+                                        <option value="5W">5W</option>
+                                        <option value="5L">5L</option>
+                                        <option value="5H">5H</option>
+                                        <option value="5F">5F</option>
+                                    </optgroup>
+                                    <optgroup label="六年級 (P6)">
+                                        <option value="6D">6D</option>
+                                        <option value="6W">6W</option>
+                                        <option value="6L">6L</option>
+                                        <option value="6H">6H</option>
+                                        <option value="6F">6F</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-700 mb-1.5">預約日期 <span class="text-red-500">*</span></label>
+                                <input type="date" id="booking-date" required onchange="syncFormDateWithView(this.value)"
+                                    class="w-full px-3.5 py-2.5 rounded-2xl bg-white/90 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all">
+                            </div>
+                        </div>
+
+                        <!-- 預約課節 (支援多節連堂勾選) -->
+                        <div>
+                            <div class="flex items-center justify-between mb-1.5">
+                                <label class="block text-xs font-semibold text-gray-700">1. 選擇課節 (可多選連堂) <span class="text-red-500">*</span></label>
+                                <div class="flex items-center space-x-2">
+                                    <button type="button" onclick="clearSelectedPeriods()" class="text-[11px] text-gray-400 hover:text-gray-600">清除課節</button>
+                                    <span id="selected-periods-count" class="text-xs font-medium text-blue-600">已選 0 節</span>
+                                </div>
+                            </div>
+                            <div id="form-periods-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto p-1">
+                                <!-- 由 JS 動態生成課節勾選按鈕 -->
+                            </div>
+                        </div>
+
+                        <!-- 選擇推車編號 (一推車一編號) -->
+                        <div class="p-3.5 rounded-2xl bg-gray-50/90 border border-gray-200/80">
+                            <div class="flex items-center justify-between mb-2">
+                                <label class="text-xs font-semibold text-gray-700">2. 精準勾選推車編號 (01~30號車) <span class="text-red-500">*</span></label>
+                                <span id="selected-carts-hint" class="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-lg">
+                                    已選 0 輛推車
+                                </span>
+                            </div>
+                            <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] text-gray-500 mb-2">
+                                <label class="inline-flex items-center space-x-1 cursor-pointer select-none text-blue-600 font-medium">
+                                    <input type="checkbox" id="hide-booked-carts-toggle" onchange="renderFormCartsGrid()" class="rounded text-blue-600 focus:ring-blue-500">
+                                    <span>僅顯示空閒推車</span>
+                                </label>
+                                <div class="flex items-center space-x-2">
+                                    <button type="button" onclick="selectAllAvailableCarts()" class="text-blue-600 hover:underline font-medium">全選空閒車</button>
+                                    <span class="text-gray-300">|</span>
+                                    <button type="button" onclick="clearSelectedCarts()" class="text-gray-500 hover:underline">取消全選</button>
+                                </div>
+                            </div>
+                            <div id="form-carts-grid" class="grid grid-cols-3 sm:grid-cols-5 gap-1.5 max-h-56 overflow-y-auto p-0.5">
+                                <!-- 由 JS 動態生成推車編號勾選按鈕 -->
+                            </div>
+                        </div>
+
+                        <!-- 備註 / 特殊需求 -->
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-700 mb-1.5">備註 / 特殊需求 (選填)</label>
+                            <textarea id="notes" rows="2" placeholder="例：需預先安裝 Keynote、借用 1 支 Apple Pencil、需推車送至 302 室..."
+                                class="w-full px-3.5 py-2 rounded-2xl bg-white/90 border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all resize-none"></textarea>
+                        </div>
+
+                        <!-- 送出按鈕 -->
+                        <button type="submit" id="submit-btn"
+                            class="w-full py-3 px-4 rounded-2xl bg-apple-blue hover:bg-apple-blueHover text-white font-semibold text-sm shadow-lg shadow-blue-500/25 transition-all flex items-center justify-center space-x-2 active:scale-[0.99] cursor-pointer">
+                            <i data-lucide="check" class="w-4 h-4"></i>
+                            <span>確認送出預約</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. 預約詳情一覽與管理 -->
+        <section class="glass-card rounded-3xl p-5 sm:p-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-gray-200/70">
+                <div>
+                    <h2 class="text-lg font-bold text-gray-900 flex items-center">
+                        <i data-lucide="clipboard-list" class="w-5 h-5 mr-2 text-blue-600"></i>
+                        預約詳情一覽與管理
+                    </h2>
+                    <p class="text-xs text-gray-500 mt-0.5">檢視所有已登記的借用紀錄，可隨時修改數量或取消預約以釋出名額</p>
+                </div>
+
+                <!-- 篩選控制項 -->
+                <div class="flex flex-wrap items-center gap-2.5">
+                    <div class="relative">
+                        <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                        <input type="text" id="filter-teacher" oninput="renderBookingsTable()" placeholder="搜尋教師姓名或班級..."
+                            class="pl-9 pr-3.5 py-2 rounded-xl bg-white/90 border border-gray-200 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500/30">
+                    </div>
+                    <select id="filter-date-mode" onchange="renderBookingsTable()"
+                        class="px-3 py-2 rounded-xl bg-white/90 border border-gray-200 text-xs font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500/30">
+                        <option value="selected">僅顯示目前檢視日期</option>
+                        <option value="all">顯示全部日期紀錄</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 預約紀錄列表 (桌面版表格 / 手機版卡片自適應) -->
+            <div class="mt-4 overflow-x-auto">
+                <table class="w-full text-left border-collapse hidden md:table">
+                    <thead>
+                        <tr class="border-b border-gray-200/80 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                            <th class="py-3 px-4">預約編號</th>
+                            <th class="py-3 px-4">日期與課節</th>
+                            <th class="py-3 px-4">教師 / 科目</th>
+                            <th class="py-3 px-4">借用班級</th>
+                            <th class="py-3 px-4">推車編號</th>
+                            <th class="py-3 px-4">備註需求</th>
+                            <th class="py-3 px-4 text-right">管理操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bookings-table-body" class="divide-y divide-gray-100 text-sm">
+                        <!-- 由 JS 動態生成 -->
+                    </tbody>
+                </table>
+
+                <!-- 手機版卡片列表 -->
+                <div id="bookings-mobile-list" class="md:hidden space-y-3">
+                    <!-- 由 JS 動態生成 -->
+                </div>
+
+                <!-- 無資料空狀態 -->
+                <div id="empty-bookings-state" class="hidden py-12 text-center">
+                    <div class="w-12 h-12 rounded-2xl bg-gray-100 text-gray-400 flex items-center justify-center mx-auto mb-3">
+                        <i data-lucide="inbox" class="w-6 h-6"></i>
+                    </div>
+                    <p class="text-sm font-medium text-gray-600">目前篩選條件下尚無預約紀錄</p>
+                    <p class="text-xs text-gray-400 mt-1">您可以點擊上方時間表或使用右側表單新增預約</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 頁尾 -->
+    <footer class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-xs text-gray-400">
+        <p>© 2026 智慧校園教學資源管理系統 · 資料自動儲存於本機瀏覽器</p>
+    </footer>
+
+    <!-- ================= 自訂彈出視窗 (Modals) ================= -->
+
+    <!-- 1. 修改推車編號 Modal -->
+    <div id="edit-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-gray-100 transform transition-all">
+            <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+                <h3 class="text-base font-bold text-gray-900 flex items-center">
+                    <i data-lucide="edit-3" class="w-4 h-4 mr-2 text-blue-600"></i>
+                    更換推車編號
+                </h3>
+                <button onclick="closeEditModal()" class="p-1 rounded-full hover:bg-gray-100 text-gray-400">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="py-4 space-y-4">
+                <div id="edit-modal-info" class="p-3 rounded-2xl bg-gray-50 text-xs text-gray-600 space-y-1">
+                    <!-- 動態填入預約資訊 -->
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-2">選擇要更換的空閒推車 (每輛 30 台)</label>
+                    <div id="edit-modal-carts-list" class="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-60 overflow-y-auto p-1">
+                        <!-- 動態填入可選推車 -->
+                    </div>
+                </div>
+                <p id="edit-modal-error" class="hidden text-xs text-red-600 font-medium"></p>
+            </div>
+            <div class="flex justify-end space-x-2 pt-2">
+                <button onclick="closeEditModal()" class="px-4 py-2 rounded-xl text-xs font-medium text-gray-600 hover:bg-gray-100">取消</button>
+                <button onclick="saveEditedCart()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white shadow-sm">儲存變更</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. 取消預約確認 Modal -->
+    <div id="cancel-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-gray-100 text-center">
+            <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="trash-2" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-base font-bold text-gray-900">確定要取消此筆預約嗎？</h3>
+            <p id="cancel-modal-desc" class="text-xs text-gray-500 mt-1.5 leading-relaxed">取消後將立即釋出該時段的平板名額給其他老師借用。</p>
+            <div class="grid grid-cols-2 gap-2.5 mt-5">
+                <button onclick="closeCancelModal()" class="py-2.5 px-4 rounded-xl text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200">保留預約</button>
+                <button onclick="confirmCancelBooking()" class="py-2.5 px-4 rounded-xl text-xs font-semibold text-white bg-red-600 hover:bg-red-700 shadow-sm">確認取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. 重置範例資料確認 Modal -->
+    <div id="reset-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-sm p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-gray-100 text-center">
+            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mx-auto mb-3">
+                <i data-lucide="rotate-ccw" class="w-6 h-6"></i>
+            </div>
+            <h3 class="text-base font-bold text-gray-900">重置為預設範例資料？</h3>
+            <p class="text-xs text-gray-500 mt-1.5 leading-relaxed">這將會清除您目前新增或修改的所有紀錄，並恢復系統預設的教學預約範例。</p>
+            <div class="grid grid-cols-2 gap-2.5 mt-5">
+                <button onclick="closeResetModal()" class="py-2.5 px-4 rounded-xl text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200">取消</button>
+                <button onclick="confirmResetData()" class="py-2.5 px-4 rounded-xl text-xs font-semibold text-white bg-amber-600 hover:bg-amber-700 shadow-sm">確認重置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast 通知提示 -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-gray-900/95 backdrop-blur-md text-white px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-2.5 text-xs font-medium">
+            <i id="toast-icon" data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+            <span id="toast-message">操作成功</span>
+        </div>
+    </div>
+
+    <script>
+        // ================= 系統常數與推車、課節定義 =================
+        const IPAD_CARTS = Array.from({ length: 30 }, (_, idx) => {
+            const num = String(idx + 1).padStart(2, '0');
+            return {
+                id: `CART-${num}`,
+                code: `${num}號車`,
+                label: `${num}號車 (30台)`,
+                desc: '配備 30 台 iPad'
+            };
+        });
+        const TOTAL_CARTS = IPAD_CARTS.length;
+        const STORAGE_KEY = 'school_ipad_30carts_bookings_v1';
+
+        const SCHOOL_PERIODS = [
+            { id: 'P1', name: '第 1 節', time: '08:05 - 08:40', type: 'class', bookable: true },
+            { id: 'P2', name: '第 2 節', time: '08:40 - 09:15', type: 'class', bookable: true },
+            { id: 'R1', name: '小息', time: '09:15 - 09:30', type: 'break', bookable: false },
+            { id: 'P3', name: '第 3 節', time: '09:30 - 10:05', type: 'class', bookable: true },
+            { id: 'P4', name: '第 4 節', time: '10:05 - 10:40', type: 'class', bookable: true },
+            { id: 'R2', name: '小息', time: '10:40 - 10:55', type: 'break', bookable: false },
+            { id: 'P5', name: '第 5 節', time: '10:55 - 11:30', type: 'class', bookable: true },
+            { id: 'P6', name: '第 6 節', time: '11:30 - 12:05', type: 'class', bookable: true },
+            { id: 'L1', name: '午膳', time: '12:05 - 13:05', type: 'break', bookable: false },
+            { id: 'P7', name: '第 7 節', time: '13:05 - 13:40', type: 'class', bookable: true },
+            { id: 'P8', name: '第 8 節', time: '13:40 - 14:15', type: 'class', bookable: true },
+            { id: 'P9', name: '第 9 節', time: '14:15 - 14:50', type: 'class', bookable: true }
+        ];
+
+        const SUBJECT_COLORS = {
+            '中文': 'bg-rose-50 text-rose-700 border-rose-200',
+            '英文': 'bg-sky-50 text-sky-700 border-sky-200',
+            '數學': 'bg-indigo-50 text-indigo-700 border-indigo-200',
+            '常識/科學': 'bg-emerald-50 text-emerald-700 border-emerald-200',
+            '資訊科技': 'bg-blue-50 text-blue-700 border-blue-200',
+            '視藝': 'bg-purple-50 text-purple-700 border-purple-200',
+            '音樂': 'bg-amber-50 text-amber-700 border-amber-200',
+            '其他': 'bg-gray-100 text-gray-700 border-gray-200'
+        };
+
+        // ================= 狀態變數 =================
+        let bookings = [];
+        let currentViewDate = getTodayStr();
+        let selectedFormPeriods = new Set(['P1']);
+        let selectedFormCarts = new Set();
+        let editingBookingId = null;
+        let selectedEditCartId = null;
+        let cancelingBookingId = null;
+
+        // ================= 工具函式 =================
+        function getTodayStr() {
+            const now = new Date();
+            const offset = now.getTimezoneOffset() * 60000;
+            return new Date(now.getTime() - offset).toISOString().split('T')[0];
+        }
+
+        function formatDateChinese(dateStr) {
+            const [y, m, d] = dateStr.split('-');
+            const dateObj = new Date(Number(y), Number(m) - 1, Number(d));
+            const weekDays = ['日', '一', '二', '三', '四', '五', '六'];
+            return `${y}年${Number(m)}月${Number(d)}日 (週${weekDays[dateObj.getDay()]})`;
+        }
+
+        function generateBookingId() {
+            const num = Math.floor(1000 + Math.random() * 9000);
+            return `BK-${num}`;
+        }
+
+        function getCartInfo(cartId) {
+            return IPAD_CARTS.find(c => c.id === cartId) || { id: cartId, code: cartId, label: cartId, desc: '' };
+        }
+
+        // ================= 初始化與範例資料 =================
+        function getDefaultSampleBookings() {
+            const today = getTodayStr();
+            const tomorrowObj = new Date();
+            tomorrowObj.setDate(tomorrowObj.getDate() + 1);
+            const offset = tomorrowObj.getTimezoneOffset() * 60000;
+            const tomorrow = new Date(tomorrowObj.getTime() - offset).toISOString().split('T')[0];
+
+            return [
+                {
+                    id: 'BK-1024',
+                    teacherName: '陳志明老師',
+                    subject: '數學',
+                    className: '6F',
+                    date: today,
+                    periodId: 'P2',
+                    cartId: 'CART-01',
+                    notes: '進行 GeoGebra 立體圖形互動練習'
+                },
+                {
+                    id: 'BK-1025',
+                    teacherName: '林雅婷老師',
+                    subject: '英文',
+                    className: '4W',
+                    date: today,
+                    periodId: 'P3',
+                    cartId: 'CART-02',
+                    notes: '分組口語錄音活動，請協助檢查麥克風權限'
+                },
+                {
+                    id: 'BK-1026',
+                    teacherName: '張偉傑老師',
+                    subject: '常識/科學',
+                    className: '5L',
+                    date: today,
+                    periodId: 'P3',
+                    cartId: 'CART-05',
+                    notes: '小組專題資料搜集'
+                },
+                {
+                    id: 'BK-1027',
+                    teacherName: '黃美玲老師',
+                    subject: '視藝',
+                    className: '6H',
+                    date: today,
+                    periodId: 'P7',
+                    cartId: 'CART-12',
+                    notes: '數位電繪課程'
+                },
+                {
+                    id: 'BK-1028',
+                    teacherName: '黃美玲老師',
+                    subject: '視藝',
+                    className: '6H',
+                    date: today,
+                    periodId: 'P8',
+                    cartId: 'CART-12',
+                    notes: '數位電繪課程 (連堂)'
+                },
+                {
+                    id: 'BK-1029',
+                    teacherName: '李家豪老師',
+                    subject: '資訊科技',
+                    className: '1D',
+                    date: tomorrow,
+                    periodId: 'P1',
+                    cartId: 'CART-03',
+                    notes: 'Scratch Jr 程式設計入門'
+                }
+            ];
+        }
+
+        function loadBookings() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    bookings = JSON.parse(raw);
+                } else {
+                    bookings = getDefaultSampleBookings();
+                    saveBookings();
+                }
+            } catch (e) {
+                console.error('讀取儲存資料失敗:', e);
+                bookings = getDefaultSampleBookings();
+            }
+        }
+
+        function saveBookings() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(bookings));
+            } catch (e) {
+                console.error('儲存資料失敗:', e);
+            }
+        }
+
+        // ================= 核心計算邏輯 (以推車編號檢查) =================
+        function getBookingForCart(dateStr, periodId, cartId, excludeBookingId = null) {
+            return bookings.find(b => 
+                b.date === dateStr && 
+                b.periodId === periodId && 
+                b.cartId === cartId && 
+                b.id !== excludeBookingId
+            );
+        }
+
+        function isCartAvailable(dateStr, periodId, cartId, excludeBookingId = null) {
+            return !getBookingForCart(dateStr, periodId, cartId, excludeBookingId);
+        }
+
+        function getAvailableCartsCount(dateStr, periodId) {
+            return IPAD_CARTS.filter(c => isCartAvailable(dateStr, periodId, c.id)).length;
+        }
+
+        // 檢查某推車在目前表單勾選的所有課節中是否皆為空閒
+        function isCartAvailableForSelectedPeriods(dateStr, cartId) {
+            if (selectedFormPeriods.size === 0) return true;
+            for (const pid of selectedFormPeriods) {
+                if (!isCartAvailable(dateStr, pid, cartId)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // ================= 畫面渲染函式 =================
+        function renderAll() {
+            renderHeaderAndStats();
+            renderWeekStrip();
+            renderPeriodsTimeline();
+            renderFormPeriodsGrid();
+            renderFormCartsGrid();
+            updateFormValidationState();
+            renderBookingsTable();
+            lucide.createIcons();
+        }
+
+        function renderHeaderAndStats() {
+            const todayStr = getTodayStr();
+            document.getElementById('header-date-text').textContent = `今日：${formatDateChinese(todayStr)}`;
+            document.getElementById('stat-total-devices').textContent = TOTAL_CARTS;
+            
+            const isToday = currentViewDate === todayStr;
+            document.getElementById('stat-selected-date-label').textContent = isToday 
+                ? '檢視日期：今日' 
+                : `檢視日期：${currentViewDate}`;
+
+            const dayBookings = bookings.filter(b => b.date === currentViewDate);
+            const bookedPeriodIds = new Set(dayBookings.map(b => b.periodId));
+
+            let minRemAcrossDay = TOTAL_CARTS;
+            SCHOOL_PERIODS.filter(p => p.bookable).forEach(p => {
+                const rem = getAvailableCartsCount(currentViewDate, p.id);
+                if (rem < minRemAcrossDay) minRemAcrossDay = rem;
+            });
+
+            document.getElementById('stat-min-available').textContent = minRemAcrossDay;
+            document.getElementById('stat-booked-sessions').textContent = bookedPeriodIds.size;
+            document.getElementById('stat-total-booked-units').textContent = `共借出 ${dayBookings.length} 架次推車`;
+        }
+
+        function renderWeekStrip() {
+            const container = document.getElementById('week-strip');
+            container.innerHTML = '';
+
+            const [y, m, d] = currentViewDate.split('-').map(Number);
+            const baseDate = new Date(y, m - 1, d);
+            const dayOfWeek = baseDate.getDay();
+            const diffToMon = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+            const monday = new Date(baseDate);
+            monday.setDate(baseDate.getDate() + diffToMon);
+
+            const weekLabels = ['週一', '週二', '週三', '週四', '週五', '週六', '週日'];
+            const todayStr = getTodayStr();
+
+            for (let i = 0; i < 7; i++) {
+                const cellDate = new Date(monday);
+                cellDate.setDate(monday.getDate() + i);
+                const offset = cellDate.getTimezoneOffset() * 60000;
+                const cellDateStr = new Date(cellDate.getTime() - offset).toISOString().split('T')[0];
+                
+                const isSelected = cellDateStr === currentViewDate;
+                const isToday = cellDateStr === todayStr;
+                const hasBookings = bookings.some(b => b.date === cellDateStr);
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.onclick = () => handleViewDateChange(cellDateStr);
+                btn.className = `flex flex-col items-center py-2 px-1 rounded-2xl transition-all border ${
+                    isSelected 
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-500/20' 
+                        : 'bg-white/60 hover:bg-white text-gray-700 border-transparent hover:border-gray-200'
+                }`;
+
+                btn.innerHTML = `
+                    <span class="text-[11px] font-medium ${isSelected ? 'text-blue-100' : 'text-gray-400'}">${weekLabels[i]}</span>
+                    <span class="text-sm font-bold mt-0.5">${cellDate.getDate()}</span>
+                    <span class="w-1.5 h-1.5 rounded-full mt-1 ${
+                        hasBookings 
+                            ? (isSelected ? 'bg-white' : 'bg-blue-500') 
+                            : (isToday ? 'bg-emerald-400' : 'bg-transparent')
+                    }"></span>
+                `;
+                container.appendChild(btn);
+            }
+        }
+
+        function renderPeriodsTimeline() {
+            const container = document.getElementById('periods-list');
+            container.innerHTML = '';
+
+            SCHOOL_PERIODS.forEach(period => {
+                // 小息或午膳（不設借用）
+                if (!period.bookable) {
+                    const breakItem = document.createElement('div');
+                    breakItem.className = 'px-4 py-2.5 rounded-2xl border border-dashed border-gray-200 bg-gray-100/60 flex items-center justify-between text-gray-400 select-none';
+                    breakItem.innerHTML = `
+                        <div class="flex items-center space-x-3">
+                            <div class="w-20 sm:w-24 shrink-0">
+                                <span class="text-xs font-mono font-medium block">${period.time}</span>
+                            </div>
+                            <span class="font-semibold text-xs text-gray-500">${period.name}</span>
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-gray-200/70 text-gray-500">不設借用</span>
+                    `;
+                    container.appendChild(breakItem);
+                    return;
+                }
+
+                const remaining = getAvailableCartsCount(currentViewDate, period.id);
+                const bookedCount = TOTAL_CARTS - remaining;
+                
+                let statusBadge = '';
+                let cardStyle = 'bg-white/85 hover:bg-white border-gray-200/80 cursor-pointer';
+
+                if (remaining === 0) {
+                    statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-red-100 text-red-700">全數借出 (0/30)</span>`;
+                    cardStyle = 'bg-gray-50/70 border-gray-200/60 opacity-85 cursor-not-allowed';
+                } else if (bookedCount > 0) {
+                    statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">尚餘 ${remaining} / 30 輛</span>`;
+                } else {
+                    statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700">全數空閒 (30 輛)</span>`;
+                }
+
+                const isSelectedInForm = selectedFormPeriods.has(period.id) && document.getElementById('booking-date').value === currentViewDate;
+                if (isSelectedInForm && remaining > 0) {
+                    cardStyle += ' ring-2 ring-blue-500 border-blue-500 bg-blue-50/30';
+                }
+
+                // 顯示該課節已借出的推車明細，以及尚餘空車摘要
+                const bookedCartsInPeriod = IPAD_CARTS
+                    .map(cart => ({ cart, booking: getBookingForCart(currentViewDate, period.id, cart.id) }))
+                    .filter(item => item.booking !== undefined);
+
+                let cartsStatusHtml = '';
+                if (bookedCartsInPeriod.length === 0) {
+                    cartsStatusHtml = `
+                        <div class="mt-2.5 px-3 py-2 rounded-xl bg-emerald-50/70 border border-emerald-200/70 text-xs text-emerald-700 flex items-center justify-between">
+                            <span class="font-medium">01號車 ~ 30號車 全部空閒，可自由精準選號</span>
+                            <span class="font-semibold text-[11px]">點擊選擇課節 →</span>
+                        </div>
+                    `;
+                } else {
+                    const bookedBadges = bookedCartsInPeriod.map(({ cart, booking }) => `
+                        <span class="inline-flex items-center px-2 py-1 rounded-lg bg-red-50 border border-red-200/80 text-[11px] font-medium text-red-700" title="${booking.teacherName} (${booking.className} · ${booking.subject})">
+                            <span class="w-1.5 h-1.5 rounded-full bg-red-500 mr-1.5"></span>
+                            <strong class="mr-1">${cart.code}</strong>${booking.teacherName}(${booking.className})
+                        </span>
+                    `).join('');
+
+                    cartsStatusHtml = `
+                        <div class="mt-2.5 space-y-1.5">
+                            <div class="flex flex-wrap gap-1.5">
+                                ${bookedBadges}
+                            </div>
+                            ${remaining > 0 ? `<div class="text-[11px] text-emerald-700 font-medium pl-0.5">其餘 ${remaining} 輛推車尚可精準挑選</div>` : ''}
+                        </div>
+                    `;
+                }
+
+                // 加入快速指定某輛空閒推車的快捷列，方便精準點選「某一節課＋某一輛車」
+                const freeCartsInPeriod = IPAD_CARTS.filter(c => isCartAvailable(currentViewDate, period.id, c.id));
+                let quickCartButtonsHtml = '';
+                if (freeCartsInPeriod.length > 0) {
+                    const previewCarts = freeCartsInPeriod.slice(0, 10).map(c => `
+                        <button type="button" onclick="event.stopPropagation(); quickSelectPeriodAndCart('${period.id}', '${c.id}')"
+                            class="px-2 py-0.5 rounded-lg text-[11px] font-semibold bg-white hover:bg-blue-600 text-blue-700 hover:text-white border border-blue-200 hover:border-blue-600 transition-colors cursor-pointer"
+                            title="直接預約 ${period.name} 的 ${c.code}">
+                            ${c.code}
+                        </button>
+                    `).join('');
+                    quickCartButtonsHtml = `
+                        <div class="mt-2 pt-2 border-t border-gray-200/60 flex items-center flex-wrap gap-1">
+                            <span class="text-[10px] text-gray-400 mr-1">精準點車：</span>
+                            ${previewCarts}
+                            ${freeCartsInPeriod.length > 10 ? `<span class="text-[10px] text-gray-400 ml-1">還有 ${freeCartsInPeriod.length - 10} 輛可在右側選號</span>` : ''}
+                        </div>
+                    `;
+                }
+
+                const item = document.createElement('div');
+                item.className = `p-3.5 sm:p-4 rounded-2xl border transition-all ${cardStyle}`;
+                if (remaining > 0) {
+                    item.onclick = () => quickSelectPeriod(period.id);
+                } else {
+                    item.onclick = () => showToast(`「${period.name}」所有 30 輛推車均已借出，請選擇其他時段`, 'error');
+                }
+
+                item.innerHTML = `
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-20 sm:w-24 shrink-0">
+                                <span class="text-xs font-mono font-medium text-gray-500 block">${period.time}</span>
+                            </div>
+                            <span class="font-bold text-sm text-gray-900">${period.name}</span>
+                        </div>
+                        ${statusBadge}
+                    </div>
+                    ${cartsStatusHtml}
+                    ${quickCartButtonsHtml}
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function renderFormPeriodsGrid() {
+            const container = document.getElementById('form-periods-grid');
+            const formDate = document.getElementById('booking-date').value || currentViewDate;
+            container.innerHTML = '';
+
+            SCHOOL_PERIODS.filter(p => p.bookable).forEach(period => {
+                const rem = getAvailableCartsCount(formDate, period.id);
+                const isSelected = selectedFormPeriods.has(period.id);
+                const isFull = rem === 0;
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.onclick = () => {
+                    if (isFull) {
+                        showToast(`「${period.name}」30 輛推車已全數借出`, 'error');
+                        return;
+                    }
+                    toggleFormPeriod(period.id);
+                };
+                btn.title = isFull ? `${period.name} (${period.time}) 已滿車` : `點選${isSelected ? '取消' : '選擇'}${period.name} (${period.time})`;
+
+                let btnClass = 'p-2 rounded-xl border text-left transition-all flex flex-col justify-between cursor-pointer ';
+                if (isFull) {
+                    btnClass += 'bg-gray-100 border-gray-200 text-gray-400 opacity-70';
+                } else if (isSelected) {
+                    btnClass += 'bg-blue-600 border-blue-600 text-white shadow-sm';
+                } else {
+                    btnClass += 'bg-white hover:bg-blue-50/50 border-gray-200 text-gray-700';
+                }
+
+                btn.className = btnClass;
+                btn.innerHTML = `
+                    <span class="text-xs font-bold truncate">${period.name}</span>
+                    <span class="text-[10px] mt-0.5 ${isSelected ? 'text-blue-100' : (isFull ? 'text-red-400' : 'text-gray-400')}">
+                        ${isFull ? '已滿車' : `剩 ${rem} 輛`}
+                    </span>
+                `;
+                container.appendChild(btn);
+            });
+
+            document.getElementById('selected-periods-count').textContent = `已選 ${selectedFormPeriods.size} 節`;
+        }
+
+        function renderFormCartsGrid() {
+            const container = document.getElementById('form-carts-grid');
+            const formDate = document.getElementById('booking-date').value || currentViewDate;
+            const hideBooked = document.getElementById('hide-booked-carts-toggle')?.checked || false;
+            container.innerHTML = '';
+
+            if (selectedFormPeriods.size === 0) {
+                container.innerHTML = `
+                    <div class="col-span-3 sm:col-span-5 py-4 text-center text-xs text-amber-700 bg-amber-50/80 rounded-xl border border-amber-200/70">
+                        請先在上方「1. 選擇課節」點選至少一節課，再挑選推車編號
+                    </div>
+                `;
+                document.getElementById('selected-carts-hint').textContent = `已選 ${selectedFormCarts.size} 輛推車`;
+                return;
+            }
+
+            IPAD_CARTS.forEach(cart => {
+                const available = isCartAvailableForSelectedPeriods(formDate, cart.id);
+                if (!available && selectedFormCarts.has(cart.id)) {
+                    selectedFormCarts.delete(cart.id);
+                }
+                if (hideBooked && !available) return;
+
+                const isSelected = selectedFormCarts.has(cart.id);
+
+                let conflictInfo = '';
+                if (!available) {
+                    const conflicts = [];
+                    selectedFormPeriods.forEach(pid => {
+                        const b = getBookingForCart(formDate, pid, cart.id);
+                        if (b) {
+                            const pObj = SCHOOL_PERIODS.find(p => p.id === pid);
+                            conflicts.push(`${pObj ? pObj.name : pid} ${b.teacherName}`);
+                        }
+                    });
+                    conflictInfo = conflicts.join('、');
+                }
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.onclick = () => {
+                    if (!available) {
+                        showToast(`${cart.code} 在所選課節已被借出 (${conflictInfo})`, 'error');
+                        return;
+                    }
+                    toggleFormCart(cart.id);
+                };
+                btn.title = !available ? `已被預約：${conflictInfo}` : `點選${isSelected ? '取消' : '選擇'}${cart.code}`;
+
+                let btnClass = 'p-2 rounded-xl border text-center transition-all flex flex-col items-center justify-center cursor-pointer ';
+                if (!available) {
+                    btnClass += 'bg-gray-100/90 border-gray-200 text-gray-400 opacity-70';
+                } else if (isSelected) {
+                    btnClass += 'bg-blue-600 border-blue-600 text-white shadow-sm';
+                } else {
+                    btnClass += 'bg-white hover:bg-blue-50/60 border-gray-200 text-gray-800';
+                }
+
+                btn.className = btnClass;
+                btn.innerHTML = `
+                    <span class="font-bold text-xs">${cart.code}</span>
+                    <span class="text-[10px] mt-0.5 truncate w-full ${isSelected ? 'text-blue-100' : (!available ? 'text-red-500 font-medium' : 'text-emerald-600')}">
+                        ${!available ? '已借出' : (isSelected ? '已選取' : '30台空閒')}
+                    </span>
+                `;
+                container.appendChild(btn);
+            });
+
+            document.getElementById('selected-carts-hint').textContent = `已選 ${selectedFormCarts.size} 輛推車`;
+        }
+
+        function selectAllAvailableCarts() {
+            const formDate = document.getElementById('booking-date').value || currentViewDate;
+            if (selectedFormPeriods.size === 0) {
+                showToast('請先選擇至少一個課節', 'error');
+                return;
+            }
+            selectedFormCarts.clear();
+            IPAD_CARTS.forEach(c => {
+                if (isCartAvailableForSelectedPeriods(formDate, c.id)) {
+                    selectedFormCarts.add(c.id);
+                }
+            });
+            renderFormCartsGrid();
+            updateFormValidationState();
+            lucide.createIcons();
+            showToast(`已勾選全部 ${selectedFormCarts.size} 輛空閒推車`);
+        }
+
+        function clearSelectedCarts() {
+            selectedFormCarts.clear();
+            renderFormCartsGrid();
+            updateFormValidationState();
+            lucide.createIcons();
+        }
+
+        function updateFormValidationState() {
+            const alertBox = document.getElementById('conflict-alert');
+            const alertText = document.getElementById('conflict-alert-text');
+            const submitBtn = document.getElementById('submit-btn');
+
+            if (selectedFormPeriods.size === 0) {
+                alertBox.classList.remove('hidden');
+                alertText.textContent = '請至少勾選一個預約課節。';
+                submitBtn.classList.add('opacity-60');
+                return;
+            }
+
+            if (selectedFormCarts.size === 0) {
+                alertBox.classList.remove('hidden');
+                alertText.textContent = '請勾選至少一輛空閒的推車編號 (01號車 ~ 30號車)。';
+                submitBtn.classList.add('opacity-60');
+                return;
+            }
+
+            alertBox.classList.add('hidden');
+            submitBtn.classList.remove('opacity-60');
+        }
+
+            if (selectedFormCarts.size === 0) {
+                alertBox.classList.remove('hidden');
+                alertText.textContent = '請勾選至少一輛空閒的推車編號 (01號車 ~ 30號車)。';
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                return;
+            }
+
+            alertBox.classList.add('hidden');
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        function renderBookingsTable() {
+            const tbody = document.getElementById('bookings-table-body');
+            const mobileList = document.getElementById('bookings-mobile-list');
+            const emptyState = document.getElementById('empty-bookings-state');
+            
+            const keyword = document.getElementById('filter-teacher').value.trim().toLowerCase();
+            const dateMode = document.getElementById('filter-date-mode').value;
+
+            let filtered = bookings.filter(b => {
+                const cartObj = getCartInfo(b.cartId);
+                const matchDate = dateMode === 'all' ? true : b.date === currentViewDate;
+                const matchKeyword = !keyword || 
+                    b.teacherName.toLowerCase().includes(keyword) || 
+                    b.className.toLowerCase().includes(keyword) ||
+                    b.subject.toLowerCase().includes(keyword) ||
+                    cartObj.code.toLowerCase().includes(keyword) ||
+                    b.id.toLowerCase().includes(keyword);
+                return matchDate && matchKeyword;
+            });
+
+            const periodOrder = SCHOOL_PERIODS.reduce((acc, p, idx) => { acc[p.id] = idx; return acc; }, {});
+            filtered.sort((a, b) => {
+                if (a.date !== b.date) return a.date.localeCompare(b.date);
+                if (periodOrder[a.periodId] !== periodOrder[b.periodId]) {
+                    return (periodOrder[a.periodId] ?? 99) - (periodOrder[b.periodId] ?? 99);
+                }
+                return a.cartId.localeCompare(b.cartId);
+            });
+
+            tbody.innerHTML = '';
+            mobileList.innerHTML = '';
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            filtered.forEach(b => {
+                const periodObj = SCHOOL_PERIODS.find(p => p.id === b.periodId) || { name: b.periodId, time: '' };
+                const cartObj = getCartInfo(b.cartId);
+                const subjStyle = SUBJECT_COLORS[b.subject] || SUBJECT_COLORS['其他'];
+
+                // 桌面版表格列
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-blue-50/30 transition-colors';
+                tr.innerHTML = `
+                    <td class="py-3.5 px-4 font-mono text-xs text-gray-500">${b.id}</td>
+                    <td class="py-3.5 px-4">
+                        <div class="font-semibold text-gray-900 text-xs">${b.date}</div>
+                        <div class="text-xs text-blue-600 font-medium mt-0.5">${periodObj.name} <span class="text-gray-400 font-normal">(${periodObj.time})</span></div>
+                    </td>
+                    <td class="py-3.5 px-4">
+                        <div class="font-semibold text-gray-900">${b.teacherName}</div>
+                        <span class="inline-block mt-1 px-2 py-0.5 rounded-md text-[11px] font-medium border ${subjStyle}">${b.subject}</span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                        <span class="px-2.5 py-1 rounded-lg bg-gray-100 font-bold text-xs text-gray-800">${b.className}</span>
+                    </td>
+                    <td class="py-3.5 px-4">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 font-bold text-xs">
+                            <i data-lucide="tablet" class="w-3.5 h-3.5 mr-1"></i>
+                            ${cartObj.label}
+                        </span>
+                    </td>
+                    <td class="py-3.5 px-4 max-w-xs">
+                        <p class="text-xs text-gray-600 line-clamp-2" title="${b.notes || '無'}">${b.notes || '<span class="text-gray-300">無特殊備註</span>'}</p>
+                    </td>
+                    <td class="py-3.5 px-4 text-right space-x-1.5 whitespace-nowrap">
+                        <button onclick="openEditModal('${b.id}')" class="px-2.5 py-1.5 rounded-xl text-xs font-medium bg-gray-100 hover:bg-blue-100 text-gray-700 hover:text-blue-700 transition-colors">
+                            更換推車
+                        </button>
+                        <button onclick="openCancelModal('${b.id}')" class="px-2.5 py-1.5 rounded-xl text-xs font-medium bg-red-50 hover:bg-red-100 text-red-600 transition-colors">
+                            取消
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+
+                // 手機版卡片
+                const card = document.createElement('div');
+                card.className = 'p-4 rounded-2xl bg-white/90 border border-gray-200/80 space-y-2.5 shadow-sm';
+                card.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span class="font-mono text-[11px] text-gray-400">${b.id}</span>
+                            <span class="px-2 py-0.5 rounded-md text-[11px] font-medium border ${subjStyle}">${b.subject}</span>
+                        </div>
+                        <span class="text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2.5 py-0.5 rounded-full">${cartObj.label}</span>
+                    </div>
+                    <div class="flex items-baseline justify-between">
+                        <div>
+                            <span class="font-bold text-gray-900 text-sm">${b.teacherName}</span>
+                            <span class="text-xs text-gray-500 ml-1.5">· ${b.className} 班</span>
+                        </div>
+                        <span class="text-xs font-semibold text-gray-700">${b.date} ${periodObj.name}</span>
+                    </div>
+                    ${b.notes ? `<p class="text-xs text-gray-500 bg-gray-50 p-2 rounded-xl">${b.notes}</p>` : ''}
+                    <div class="pt-2 border-t border-gray-100 flex justify-end space-x-2">
+                        <button onclick="openEditModal('${b.id}')" class="px-3 py-1.5 rounded-xl text-xs font-medium bg-gray-100 text-gray-700">更換推車</button>
+                        <button onclick="openCancelModal('${b.id}')" class="px-3 py-1.5 rounded-xl text-xs font-medium bg-red-50 text-red-600">取消預約</button>
+                    </div>
+                `;
+                mobileList.appendChild(card);
+            });
+        }
+
+        // ================= 互動事件處理 =================
+        function handleViewDateChange(newDate) {
+            if (!newDate) return;
+            currentViewDate = newDate;
+            document.getElementById('view-date-picker').value = newDate;
+            document.getElementById('booking-date').value = newDate;
+            
+            const validPeriods = new Set();
+            selectedFormPeriods.forEach(pid => {
+                const periodObj = SCHOOL_PERIODS.find(p => p.id === pid);
+                if (periodObj && periodObj.bookable && getAvailableCartsCount(newDate, pid) > 0) {
+                    validPeriods.add(pid);
+                }
+            });
+            selectedFormPeriods = validPeriods;
+            renderAll();
+        }
+
+        function syncFormDateWithView(newDate) {
+            if (!newDate) return;
+            currentViewDate = newDate;
+            document.getElementById('view-date-picker').value = newDate;
+            renderAll();
+        }
+
+        function changeDate(offsetDays) {
+            const [y, m, d] = currentViewDate.split('-').map(Number);
+            const dt = new Date(y, m - 1, d);
+            dt.setDate(dt.getDate() + offsetDays);
+            const offset = dt.getTimezoneOffset() * 60000;
+            handleViewDateChange(new Date(dt.getTime() - offset).toISOString().split('T')[0]);
+        }
+
+        function goToToday() {
+            handleViewDateChange(getTodayStr());
+        }
+
+        function quickSelectPeriod(periodId) {
+            const periodObj = SCHOOL_PERIODS.find(p => p.id === periodId);
+            if (!periodObj || !periodObj.bookable) return;
+
+            document.getElementById('booking-date').value = currentViewDate;
+            selectedFormPeriods.clear();
+            selectedFormPeriods.add(periodId);
+
+            // 清理在該課節已不可用的推車勾選，但不強制替換成別台車，讓老師精準決定要哪幾輛
+            const validCarts = new Set();
+            selectedFormCarts.forEach(cid => {
+                if (isCartAvailable(currentViewDate, periodId, cid)) {
+                    validCarts.add(cid);
+                }
+            });
+            selectedFormCarts = validCarts;
+
+            renderAll();
+
+            if (window.innerWidth < 1024) {
+                document.getElementById('booking-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            showToast(`已選擇「${periodObj.name}」，請在右側精準勾選推車編號`);
+        }
+
+        function quickSelectPeriodAndCart(periodId, cartId) {
+            const periodObj = SCHOOL_PERIODS.find(p => p.id === periodId);
+            const cartObj = getCartInfo(cartId);
+            if (!periodObj || !periodObj.bookable || !isCartAvailable(currentViewDate, periodId, cartId)) {
+                showToast('該推車在此課節已不可用', 'error');
+                return;
+            }
+
+            document.getElementById('booking-date').value = currentViewDate;
+            selectedFormPeriods.clear();
+            selectedFormPeriods.add(periodId);
+            selectedFormCarts.clear();
+            selectedFormCarts.add(cartId);
+
+            renderAll();
+
+            if (window.innerWidth < 1024) {
+                document.getElementById('booking-form').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            showToast(`已精準選定「${periodObj.name} · ${cartObj.code}」`);
+        }
+
+        function toggleFormPeriod(periodId) {
+            const formDate = document.getElementById('booking-date').value || currentViewDate;
+            if (getAvailableCartsCount(formDate, periodId) === 0) {
+                showToast('該課節推車已全數借出', 'error');
+                return;
+            }
+
+            if (selectedFormPeriods.has(periodId)) {
+                selectedFormPeriods.delete(periodId);
+            } else {
+                selectedFormPeriods.add(periodId);
+            }
+
+            // 移除在目前已選課節中有衝突的推車
+            const validCarts = new Set();
+            selectedFormCarts.forEach(cid => {
+                if (isCartAvailableForSelectedPeriods(formDate, cid)) {
+                    validCarts.add(cid);
+                }
+            });
+            selectedFormCarts = validCarts;
+
+            renderAll();
+        }
+
+        function clearSelectedPeriods() {
+            selectedFormPeriods.clear();
+            selectedFormCarts.clear();
+            renderAll();
+        }
+
+        function toggleFormCart(cartId) {
+            const formDate = document.getElementById('booking-date').value || currentViewDate;
+            if (selectedFormPeriods.size === 0) {
+                showToast('請先選擇至少一個預約課節', 'error');
+                return;
+            }
+            if (!isCartAvailableForSelectedPeriods(formDate, cartId) && !selectedFormCarts.has(cartId)) {
+                showToast('該推車在所選課節已被借出', 'error');
+                return;
+            }
+
+            if (selectedFormCarts.has(cartId)) {
+                selectedFormCarts.delete(cartId);
+            } else {
+                selectedFormCarts.add(cartId);
+            }
+            renderFormCartsGrid();
+            updateFormValidationState();
+            lucide.createIcons();
+        }
+
+        function handleBookingSubmit(e) {
+            e.preventDefault();
+            const teacherNameEl = document.getElementById('teacher-name');
+            const classNameEl = document.getElementById('class-name');
+            const dateEl = document.getElementById('booking-date');
+            
+            const teacherName = teacherNameEl.value.trim();
+            const subject = document.getElementById('subject').value;
+            const className = classNameEl.value.trim().toUpperCase();
+            const date = dateEl.value;
+            const notes = document.getElementById('notes').value.trim();
+
+            if (!teacherName) {
+                teacherNameEl.focus();
+                showToast('請輸入「教師姓名」', 'error');
+                return;
+            }
+
+            if (!className) {
+                classNameEl.focus();
+                showToast('請先選擇「借用班級」', 'error');
+                return;
+            }
+
+            if (!date) {
+                dateEl.focus();
+                showToast('請選擇「預約日期」', 'error');
+                return;
+            }
+
+            if (selectedFormPeriods.size === 0) {
+                document.getElementById('form-periods-grid').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                showToast('請至少點選一個「預約課節」', 'error');
+                return;
+            }
+
+            if (selectedFormCarts.size === 0) {
+                document.getElementById('form-carts-grid').scrollIntoView({ behavior: 'smooth', block: 'center' });
+                showToast('請至少勾選一輛「推車編號」(01號車 ~ 30號車)', 'error');
+                return;
+            }
+
+            // 再次防撞車檢查
+            for (const pid of selectedFormPeriods) {
+                for (const cid of selectedFormCarts) {
+                    if (!isCartAvailable(date, pid, cid)) {
+                        const cartObj = getCartInfo(cid);
+                        showToast(`預約失敗！${cartObj.code} 在所選課節中已被其他老師預約`, 'error');
+                        renderAll();
+                        return;
+                    }
+                }
+            }
+
+            const orderedPeriods = SCHOOL_PERIODS
+                .filter(p => p.bookable && selectedFormPeriods.has(p.id))
+                .map(p => p.id);
+            const orderedCarts = IPAD_CARTS
+                .filter(c => selectedFormCarts.has(c.id))
+                .map(c => c.id);
+
+            let createdCount = 0;
+            orderedPeriods.forEach((pid, pIdx) => {
+                orderedCarts.forEach(cid => {
+                    bookings.push({
+                        id: generateBookingId(),
+                        teacherName,
+                        subject,
+                        className,
+                        date,
+                        periodId: pid,
+                        cartId: cid,
+                        notes: orderedPeriods.length > 1 && pIdx > 0 
+                            ? (notes ? `${notes} (連堂)` : '連堂預約') 
+                            : notes
+                    });
+                    createdCount++;
+                });
+            });
+
+            saveBookings();
+            // 保留已選課節並自動預選下一輛可用推車，方便連續操作
+            selectedFormCarts.clear();
+            const firstSelectedPeriod = orderedPeriods[0];
+            if (firstSelectedPeriod) {
+                const nextFreeCart = IPAD_CARTS.find(c => isCartAvailable(date, firstSelectedPeriod, c.id));
+                if (nextFreeCart) selectedFormCarts.add(nextFreeCart.id);
+            }
+            document.getElementById('notes').value = '';
+            renderAll();
+            showToast(`預約成功！已為 ${teacherName} (${className}) 登記 ${createdCount} 項推車借用`);
+        }
+
+        function resetForm() {
+            document.getElementById('teacher-name').value = '';
+            document.getElementById('class-name').value = '';
+            document.getElementById('notes').value = '';
+            selectedFormPeriods.clear();
+            selectedFormCarts.clear();
+            renderAll();
+        }
+
+        // ================= Modal 控制函式 =================
+        function openEditModal(bookingId) {
+            const target = bookings.find(b => b.id === bookingId);
+            if (!target) return;
+
+            editingBookingId = bookingId;
+            selectedEditCartId = target.cartId;
+            const periodObj = SCHOOL_PERIODS.find(p => p.id === target.periodId) || { name: target.periodId };
+            const currentCart = getCartInfo(target.cartId);
+
+            document.getElementById('edit-modal-info').innerHTML = `
+                <div><span class="font-semibold text-gray-800">預約編號：</span>${target.id}</div>
+                <div><span class="font-semibold text-gray-800">借用老師：</span>${target.teacherName} (${target.className} · ${target.subject})</div>
+                <div><span class="font-semibold text-gray-800">預約時段：</span>${target.date} ${periodObj.name} (目前為 ${currentCart.code})</div>
+            `;
+
+            const listContainer = document.getElementById('edit-modal-carts-list');
+            listContainer.innerHTML = '';
+
+            IPAD_CARTS.forEach(cart => {
+                const avail = isCartAvailable(target.date, target.periodId, cart.id, target.id);
+                const otherBooking = getBookingForCart(target.date, target.periodId, cart.id, target.id);
+                
+                const label = document.createElement('label');
+                label.className = `flex flex-col items-center justify-center p-2 rounded-xl border text-center cursor-pointer transition-all ${
+                    !avail 
+                        ? 'bg-gray-100 border-gray-200 opacity-55 cursor-not-allowed' 
+                        : 'bg-white hover:bg-blue-50/50 border-gray-200'
+                }`;
+                if (!avail && otherBooking) label.title = `已被 ${otherBooking.teacherName} 借用`;
+
+                label.innerHTML = `
+                    <input type="radio" name="edit-cart-radio" value="${cart.id}" 
+                        ${cart.id === target.cartId ? 'checked' : ''} 
+                        ${!avail ? 'disabled' : ''}
+                        onchange="selectedEditCartId = '${cart.id}'"
+                        class="sr-only peer">
+                    <div class="w-full py-1 rounded-lg peer-checked:bg-blue-600 peer-checked:text-white">
+                        <div class="font-bold text-xs">${cart.code}</div>
+                        <div class="text-[10px] mt-0.5 ${
+                            cart.id === target.cartId 
+                                ? 'opacity-90' 
+                                : (avail ? 'text-emerald-600 peer-checked:text-blue-100' : 'text-red-500')
+                        }">
+                            ${cart.id === target.cartId ? '目前使用' : (avail ? '可更換' : '已借出')}
+                        </div>
+                    </div>
+                `;
+                listContainer.appendChild(label);
+            });
+
+            document.getElementById('edit-modal-error').classList.add('hidden');
+            const modal = document.getElementById('edit-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeEditModal() {
+            editingBookingId = null;
+            selectedEditCartId = null;
+            const modal = document.getElementById('edit-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function saveEditedCart() {
+            if (!editingBookingId || !selectedEditCartId) return;
+            const target = bookings.find(b => b.id === editingBookingId);
+            if (!target) return;
+
+            const errorEl = document.getElementById('edit-modal-error');
+            if (!isCartAvailable(target.date, target.periodId, selectedEditCartId, target.id)) {
+                errorEl.textContent = '該推車在此課節已被其他老師預約，請選擇其他空閒推車！';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            target.cartId = selectedEditCartId;
+            saveBookings();
+            closeEditModal();
+            renderAll();
+            const newCart = getCartInfo(selectedEditCartId);
+            showToast(`已將預約 ${target.id} 更換為「${newCart.label}」`);
+        }
+
+        function openCancelModal(bookingId) {
+            const target = bookings.find(b => b.id === bookingId);
+            if (!target) return;
+            cancelingBookingId = bookingId;
+            const periodObj = SCHOOL_PERIODS.find(p => p.id === target.periodId) || { name: target.periodId };
+            const cartObj = getCartInfo(target.cartId);
+            document.getElementById('cancel-modal-desc').textContent = 
+                `確定要取消 ${target.teacherName} 於 ${target.date}「${periodObj.name}」的【${cartObj.label}】預約嗎？`;
+            
+            const modal = document.getElementById('cancel-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeCancelModal() {
+            cancelingBookingId = null;
+            const modal = document.getElementById('cancel-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function confirmCancelBooking() {
+            if (!cancelingBookingId) return;
+            bookings = bookings.filter(b => b.id !== cancelingBookingId);
+            saveBookings();
+            closeCancelModal();
+            renderAll();
+            showToast('已取消預約並釋出該推車編號');
+        }
+
+        function openResetModal() {
+            const modal = document.getElementById('reset-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeResetModal() {
+            const modal = document.getElementById('reset-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function confirmResetData() {
+            bookings = getDefaultSampleBookings();
+            saveBookings();
+            closeResetModal();
+            goToToday();
+            showToast('已恢復為系統預設範例資料');
+        }
+
+        // ================= Toast 通知控制 =================
+        let toastTimer = null;
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const msgEl = document.getElementById('toast-message');
+            const iconEl = document.getElementById('toast-icon');
+
+            msgEl.textContent = message;
+            if (type === 'error') {
+                iconEl.setAttribute('data-lucide', 'alert-circle');
+                iconEl.className = 'w-4 h-4 text-red-400';
+            } else {
+                iconEl.setAttribute('data-lucide', 'check-circle');
+                iconEl.className = 'w-4 h-4 text-emerald-400';
+            }
+            lucide.createIcons();
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3200);
+        }
+
+        // ================= 啟動初始化 =================
+        window.addEventListener('DOMContentLoaded', () => {
+            const today = getTodayStr();
+            currentViewDate = today;
+            document.getElementById('view-date-picker').value = today;
+            document.getElementById('booking-date').value = today;
+
+            loadBookings();
+            selectedFormPeriods = new Set();
+            selectedFormCarts = new Set();
+
+            renderAll();
+        });
+    </script>
+</body>
+</html>
